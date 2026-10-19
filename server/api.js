@@ -8,8 +8,8 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('node:crypto');
-const fs = require('node:fs/promises');
 const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
 const nodemailer = require('nodemailer');
 const path = require('node:path');
 const { pool, query, checkDatabase, checkSchema } = require('./db');
@@ -34,6 +34,27 @@ function parseProductImageUpload(req, res, next) {
       return res.status(400).json(errorResponse(400, 'invalid_image_upload', message));
     }
     return error ? next(error) : next();
+  });
+}
+function uploadImageToCloudinary(buffer) {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
+  if (!cloudName || !uploadPreset) {
+    const error = new Error('Cloudinary upload is not configured.');
+    error.status = 503;
+    throw error;
+  }
+  cloudinary.config({ cloud_name: cloudName });
+  return new Promise(function (resolve, reject) {
+    const stream = cloudinary.uploader.unsigned_upload_stream(uploadPreset, function (error, result) {
+      if (error) {
+        error.status = 502;
+        return reject(error);
+      }
+      if (!result || !result.secure_url) return reject(new Error('Cloudinary did not return a secure URL.'));
+      return resolve(result.secure_url);
+    });
+    stream.end(buffer);
   });
 }
 const COOKIE_NAME = 'kundu_session';
@@ -768,6 +789,19 @@ app.get('/api/vendor/dashboard', authenticateToken, requireRole('vendor'), async
   }
 });
 
+app.post('/api/uploads', authenticateToken, requireRole('vendor'), requireActiveVendor, parseProductImageUpload, async function (req, res, next) {
+  if (!req.file) return res.status(400).json(errorResponse(400, 'missing_image', 'Select an image to upload.'));
+  if (!getProductImageFormat(req.file.buffer)) {
+    return res.status(400).json(errorResponse(400, 'invalid_product_image', 'Upload a valid JPEG, PNG, or WebP image.'));
+  }
+  try {
+    const secureUrl = await uploadImageToCloudinary(req.file.buffer);
+    return res.status(201).json({ secure_url: secureUrl });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 app.post('/api/vendor/products', authenticateToken, requireRole('vendor'), requireActiveVendor, parseProductImageUpload, async function (req, res, next) {
   const body = req.body || {};
   const name = normalizeString(body.name);
@@ -786,8 +820,8 @@ app.post('/api/vendor/products', authenticateToken, requireRole('vendor'), requi
   if (req.file && !imageFormat) {
     return res.status(400).json(errorResponse(400, 'invalid_product_image', 'Upload a valid JPEG, PNG, or WebP image.'));
   }
-  const imageUrl = req.file
-    ? `/uploads/products/${crypto.randomUUID()}${imageFormat.extension}`
+  let imageUrl = req.file
+    ? ''
     : (body.imageUrl === undefined ? '' : body.imageUrl);
   if (name.length < 2 || name.length > 180 || !category || category.length > 80 ||
       !PRODUCT_DELIVERY_TYPES.has(deliveryType) ||
@@ -805,12 +839,8 @@ app.post('/api/vendor/products', authenticateToken, requireRole('vendor'), requi
       (imageUrl && !validProductImageUrl(imageUrl))) {
     return res.status(400).json(errorResponse(400, 'invalid_product', 'Provide valid product details and a local driver/skipper contact for delivery listings. Pickup-only listings do not need a local contact.'));
   }
-  const imagePath = req.file ? path.join(uploadsRoot, 'products', path.basename(imageUrl)) : null;
   try {
-    if (req.file) {
-      await fs.mkdir(path.dirname(imagePath), { recursive: true });
-      await fs.writeFile(imagePath, req.file.buffer, { flag: 'wx' });
-    }
+    if (req.file) imageUrl = await uploadImageToCloudinary(req.file.buffer);
     const result = await query(
       `INSERT INTO products (vendor_id, product_name, description, category, province, delivery_type, item_condition, price_unit, delivery_notes, additional_details, delivery_contacts, price_kina, stock_quantity, image_url, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12, $13, NULLIF($14, ''), $15)
@@ -819,7 +849,6 @@ app.post('/api/vendor/products', authenticateToken, requireRole('vendor'), requi
     );
     return res.status(201).json(successResponse(201, 'Product created.', { product: result.rows[0] }));
   } catch (error) {
-    if (imagePath) await fs.unlink(imagePath).catch(function () {});
     return next(error);
   }
 });
@@ -838,13 +867,11 @@ app.patch('/api/vendor/products/:productId', authenticateToken, requireRole('ven
   if (req.file && !imageFormat) {
     return res.status(400).json(errorResponse(400, 'invalid_product_image', 'Upload a valid JPEG, PNG, or WebP image.'));
   }
-  const imagePath = req.file
-    ? `/uploads/products/${crypto.randomUUID()}${imageFormat.extension}`
-    : null;
-  if (imagePath) body.imageUrl = imagePath;
+  if (req.file) body.imageUrl = '';
   const columns = { name: 'product_name', description: 'description', category: 'category', province: 'province', deliveryType: 'delivery_type', condition: 'item_condition', priceUnit: 'price_unit', deliveryNotes: 'delivery_notes', priceKina: 'price_kina', stockQuantity: 'stock_quantity', imageUrl: 'image_url', status: 'status' };
   const fields = [];
   const values = [id, req.vendor.vendor_id];
+  let imageUrlValueIndex = null;
   for (const key of Object.keys(columns)) {
     if (!Object.prototype.hasOwnProperty.call(body, key)) continue;
     let value = body[key];
@@ -865,6 +892,7 @@ app.patch('/api/vendor/products/:productId', authenticateToken, requireRole('ven
     }
     if (key === 'priceKina' || key === 'stockQuantity') value = Number(value);
     if (typeof value === 'string') value = value.trim();
+    if (key === 'imageUrl') imageUrlValueIndex = values.length;
     values.push(value);
     fields.push(`${columns[key]} = $${values.length}`);
   }
@@ -882,14 +910,16 @@ app.patch('/api/vendor/products/:productId', authenticateToken, requireRole('ven
     fields.push(`status = CASE WHEN $${stockValueIndex} = 0 THEN 'out_of_stock' WHEN status = 'out_of_stock' THEN 'listed' ELSE status END`);
   }
   if (!fields.length) return res.status(400).json(errorResponse(400, 'empty_update', 'Provide at least one field to update.'));
+  if (req.file) {
+    try {
+      values[imageUrlValueIndex] = await uploadImageToCloudinary(req.file.buffer);
+    } catch (error) {
+      return next(error);
+    }
+  }
   fields.push('updated_at = NOW()');
   let client;
-  const storedImagePath = imagePath ? path.join(uploadsRoot, 'products', path.basename(imagePath)) : null;
   try {
-    if (req.file) {
-      await fs.mkdir(path.dirname(storedImagePath), { recursive: true });
-      await fs.writeFile(storedImagePath, req.file.buffer, { flag: 'wx' });
-    }
     client = await pool.connect();
     await client.query('BEGIN');
     const current = await client.query(
@@ -948,7 +978,6 @@ app.patch('/api/vendor/products/:productId', authenticateToken, requireRole('ven
     return res.status(200).json(successResponse(200, 'Product updated.', { product: result.rows[0] }));
   } catch (error) {
     if (client) await client.query('ROLLBACK');
-    if (storedImagePath) await fs.unlink(storedImagePath).catch(function () {});
     return next(error);
   } finally {
     if (client) client.release();
@@ -2688,7 +2717,6 @@ async function start() {
   if (!schema.ok) {
     console.error(`PostgreSQL schema is incomplete or incompatible. Page routes will be served, but database-backed features may fail until reviewed migrations are applied. Missing objects: ${schema.missing.join(', ')}.`);
   }
-  await fs.mkdir(path.join(uploadsRoot, 'products'), { recursive: true });
   const server = app.listen(PORT, function () {
     console.log(`KEDOLAKA MARKET is available at http://localhost:${PORT}`);
   });
