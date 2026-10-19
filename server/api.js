@@ -83,8 +83,11 @@ const VENDOR_PAYMENT_METHODS = Object.freeze({
 const MANUAL_PAYMENT_METHODS = new Set(Object.keys(VENDOR_PAYMENT_METHODS).map(function (id) {
   return VENDOR_PAYMENT_METHODS[id].databaseMethod;
 }).concat(['manual_bank_transfer', 'cash_on_delivery', 'in_person']));
-const origins = new Set((process.env.CORS_ORIGINS || `http://localhost:${PORT}`)
-  .split(',').map(function (origin) { return origin.trim(); }).filter(Boolean));
+const origins = new Set([
+  `http://localhost:${PORT}`,
+  'https://vercel.app',
+  ...(process.env.CORS_ORIGINS || '').split(',')
+].map(function (origin) { return origin.trim(); }).filter(Boolean));
 
 function isAllowedOrigin(origin, req) {
   if (!origin || origins.has(origin)) return true;

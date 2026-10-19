@@ -176,6 +176,13 @@ test('public page aliases, assets, and unauthenticated API guards are reachable'
     });
     assert.equal(sameOriginRequest.status, 401);
     assert.equal(sameOriginRequest.headers.get('access-control-allow-origin'), baseUrl);
+    const vercelOriginRequest = await fetch(baseUrl + '/api/auth/logout', {
+      method: 'POST',
+      headers: { Origin: 'https://vercel.app' }
+    });
+    assert.equal(vercelOriginRequest.status, 401);
+    assert.equal(vercelOriginRequest.headers.get('access-control-allow-origin'), 'https://vercel.app');
+    assert.equal(vercelOriginRequest.headers.get('access-control-allow-credentials'), 'true');
     const rejectedOrigin = await fetch(baseUrl + '/api/auth/logout', {
       method: 'POST',
       headers: { Origin: 'https://untrusted.example' }
