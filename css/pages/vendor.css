@@ -1,0 +1,240 @@
+body[data-requires-role="vendor"] main.container:not(.vendor-products-page):not(.vendor-product-form-page) {
+  padding-bottom: 48px;
+}
+
+body[data-requires-role="vendor"] main.container > section,
+body[data-requires-role="vendor"] main.container > ul,
+body[data-requires-role="vendor"] main.container > nav[aria-label="Vendor tools"] {
+  margin-top: 18px;
+}
+
+body[data-requires-role="vendor"] main.container > section,
+body[data-requires-role="vendor"] main.container > ul {
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid var(--brand-line);
+  border-radius: 16px;
+  background: var(--brand-card);
+  box-shadow: var(--brand-shadow);
+}
+
+body[data-requires-role="vendor"] main.container > ul {
+  display: grid;
+  gap: 12px;
+  padding-left: 38px;
+}
+
+body[data-requires-role="vendor"] main.container > ul li {
+  padding: 10px 0;
+}
+
+body[data-requires-role="vendor"] main.container nav[aria-label="Vendor tools"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+body[data-requires-role="vendor"] main.container nav[aria-label="Vendor tools"] a {
+  padding: 11px 14px;
+  border: 1px solid var(--brand-line);
+  border-radius: 11px;
+  background: var(--brand-forest-soft);
+  font-weight: 700;
+}
+
+body[data-requires-role="vendor"] main.container form {
+  gap: 14px;
+}
+
+body[data-requires-role="vendor"] #vendorPaymentSettings form {
+  max-width: 900px;
+}
+
+body[data-requires-role="vendor"] #vendorOrders > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--brand-line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+body[data-requires-role="vendor"] #vendorOrders input {
+  min-height: 42px;
+  max-width: 360px;
+  padding: 8px 10px;
+  border: 1px solid #9ba99f;
+  border-radius: 9px;
+}
+
+body[data-requires-role="vendor"] .vendor-shipment-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  width: 100%;
+  margin-block: 12px;
+}
+
+body[data-requires-role="vendor"] .vendor-shipment-form label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+body[data-requires-role="vendor"] .vendor-shipment-form input,
+body[data-requires-role="vendor"] .vendor-shipment-form textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--brand-line);
+  border-radius: 6px;
+}
+
+body[data-requires-role="vendor"] .vendor-shipment-form textarea {
+  resize: vertical;
+}
+
+body[data-requires-role="vendor"] .vendor-shipment-form button {
+  align-self: end;
+  min-height: 42px;
+}
+
+body[data-requires-role="vendor"] .vendor-payment-options {
+  width: 100%;
+  margin-block: 8px 16px;
+}
+
+body[data-requires-role="vendor"] .vendor-payment-options,
+body[data-requires-role="vendor"] .vendor-payment-option {
+  color: var(--brand-ink);
+}
+
+body[data-requires-role="vendor"] .vendor-payment-option {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--brand-line);
+  border-radius: 10px;
+  background: #fffefa;
+}
+
+body[data-requires-role="vendor"] .vendor-payment-option > label:first-child {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  gap: 9px;
+  font-weight: 700;
+}
+
+body[data-requires-role="vendor"] .vendor-payment-instructions {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+body[data-requires-role="vendor"] .vendor-payment-instructions > p {
+  margin: 0;
+  color: var(--brand-muted);
+  font-size: 0.92rem;
+}
+
+body[data-requires-role="vendor"] .vendor-reference-contact-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+
+body[data-requires-role="vendor"] .vendor-reference-contact-fields input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid var(--brand-line);
+  border-radius: 7px;
+}
+
+body[data-requires-role="vendor"] .vendor-payment-instructions textarea,
+body[data-requires-role="vendor"] .vendor-payment-instructions input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #9ba99f;
+  border-radius: 9px;
+}
+
+body[data-requires-role="vendor"] .vendor-payment-instructions textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+body[data-requires-role="vendor"] .vendor-payment-instructions input {
+  min-height: 44px;
+}
+
+body[data-requires-role="vendor"] .vendor-bank-account {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--brand-line);
+  border-radius: 10px;
+  background: #f8faf7;
+}
+
+body[data-requires-role="vendor"] .vendor-bank-account h4 {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--brand-forest-deep);
+}
+
+body[data-requires-role="vendor"] .vendor-mobile-wallet {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+
+body[data-requires-role="vendor"] .vendor-payment-instructions label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-weight: 600;
+}
+
+body[data-requires-role="vendor"] .vendor-payment-instructions input:disabled,
+body[data-requires-role="vendor"] .vendor-payment-instructions textarea:disabled {
+  background: #ecefeb;
+}
+
+body[data-requires-role="vendor"] button:focus-visible,
+body[data-requires-role="vendor"] input:focus-visible,
+body[data-requires-role="vendor"] textarea:focus-visible {
+  outline: 3px solid var(--brand-gold);
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  body[data-requires-role="vendor"] .vendor-shipment-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body[data-requires-role="vendor"] main.container nav[aria-label="Vendor tools"] {
+    flex-direction: column;
+  }
+
+  body[data-requires-role="vendor"] main.container nav[aria-label="Vendor tools"] a {
+    text-align: center;
+  }
+
+  body[data-requires-role="vendor"] .vendor-bank-account,
+  body[data-requires-role="vendor"] .vendor-mobile-wallet,
+  body[data-requires-role="vendor"] .vendor-reference-contact-fields {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-requires-role="vendor"] .vendor-bank-account h4 {
+    grid-column: auto;
+  }
+}

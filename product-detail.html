@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product details | KEDOLAKA MARKET</title>
+    <meta name="description" content="View a current product listing on KEDOLAKA MARKET." />
+  <link rel="icon" type="image/svg+xml" href="/assets/kedolaka-market-icon.svg">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#123f35">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/market-theme.css">
+  <link rel="stylesheet" href="/css/pages/product-detail.css">
+</head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand brand-logo-link" href="/" aria-label="KEDOLAKA MARKET home"><img class="brand-logo" src="/assets/kedolaka-market-compact.svg" alt="KEDOLAKA MARKET"></a>
+
+        <nav class="main-nav" aria-label="Main navigation">
+          <a href="index.html">Home</a>
+          <a href="/products">Products</a>
+          <a href="/products">Browse categories</a>
+          <a href="vendor-application.html">Sell on KEDOLAKA</a>
+          <a href="cart.html" class="nav-cart">Cart <span class="cart-badge">0</span></a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <div class="container detail-layout">
+        <section class="product-figure-card">
+          <div id="detailImage" class="product-showcase visual-gold">Product image unavailable</div>
+          <div class="gallery-meta">
+            <span id="detailCategory" class="badge badge-gold">Product</span>
+            <span id="detailApprovedBadge" class="badge badge-outline" hidden>Approved seller</span>
+          </div>
+        </section>
+
+        <section class="product-info-card">
+          <div class="crumbs"><a href="index.html">Home</a> / Product</div>
+          <h1 id="detailName">Product not selected</h1>
+          <div class="rating-row">
+            <span>Approved vendor</span>
+            <span id="detailStock">Availability is not loaded.</span>
+          </div>
+
+          <div class="price-block">
+            <span id="detailPrice" class="price">Price unavailable</span>
+            <span class="small-label">PGK</span>
+          </div>
+
+          <div class="details-grid">
+            <div>
+              <label>Vendor</label>
+              <strong id="detailVendor">Vendor</strong>
+            </div>
+            <div>
+              <label>Location</label>
+              <strong id="detailProvince">Province</strong>
+            </div>
+            <div>
+              <label>Stock</label>
+              <strong>Rechecked at checkout</strong>
+            </div>
+            <div>
+              <label>Delivery type</label>
+              <strong id="detailDelivery">Not loaded</strong>
+            </div>
+            <div>
+              <label>Condition</label>
+              <strong id="detailCondition">Not loaded</strong>
+            </div>
+            <div>
+              <label>Price applies to</label>
+              <strong id="detailPriceUnit">Not loaded</strong>
+            </div>
+            <div>
+              <label>Shipping</label>
+              <strong>Route estimates depend on configured rates</strong>
+            </div>
+          </div>
+
+          <p id="detailDescription" class="description">Open a listing from the catalog to see its current details.</p>
+          <section id="detailDeliveryNotesSection" class="product-delivery-notes" hidden>
+            <h2>Delivery and pickup notes</h2>
+            <p id="detailDeliveryNotes"></p>
+          </section>
+          <section id="detailAdditionalDetailsSection" class="product-delivery-notes" hidden>
+            <h2>Product and fulfillment details</h2>
+            <dl id="detailAdditionalDetails"></dl>
+          </section>
+
+          <div class="purchase-actions">
+            <button type="button" class="btn btn-primary" id="addToCartBtn">Add to Cart</button>
+            <a href="cart.html" class="btn btn-secondary">View Cart</a>
+          </div>
+
+          <p id="detailStatus" class="description" aria-live="polite"></p>
+        </section>
+      </div>
+
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>© 2026 KEDOLAKA MARKET | Connecting PNG communities</p>
+        <div>
+          <a href="index.html">Marketplace</a>
+          <a href="cart.html">Cart</a>
+          <a href="checkout.html">Checkout</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/js/marketplace.js"></script>
+  </body>
+</html>

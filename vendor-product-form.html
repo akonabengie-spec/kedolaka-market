@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add product | KEDOLAKA MARKET</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/kedolaka-market-icon.svg">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#123f35">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/market-theme.css">
+  <link rel="stylesheet" href="/css/vendor-product-form.css">
+</head>
+<body data-requires-role="vendor">
+  <header class="topbar">
+    <a class="brand brand-logo-link" href="/" aria-label="KEDOLAKA MARKET home"><img class="brand-logo" src="/assets/kedolaka-market-compact.svg" alt="KEDOLAKA MARKET"></a>
+    <nav class="main-nav" aria-label="Vendor navigation">
+      <a href="vendor-dashboard.html">Dashboard</a>
+      <a href="vendor-products.html">Products and inventory</a>
+      <a href="vendor-orders.html">Fulfillment</a>
+      <a href="index.html">Marketplace</a>
+    </nav>
+  </header>
+  <main id="vendorWorkspace" class="container vendor-product-form-page">
+    <nav aria-label="Breadcrumb"><a href="vendor-dashboard.html">Vendor dashboard</a> / <a href="vendor-products.html">Products</a> / <span id="productFormBreadcrumb">Add product</span></nav>
+    <h1 id="productFormTitle">Add a product</h1>
+    <p id="vendorMessage" aria-live="polite">Loading vendor account...</p>
+    <section id="vendorManagement" class="workspace-panel">
+      <form id="vendorProductForm" class="workspace-form">
+        <label>Product name
+          <input name="name" maxlength="180" minlength="2" required>
+        </label>
+        <label>Category
+          <input name="category" maxlength="80" required>
+        </label>
+        <label class="product-form-wide">Description
+          <textarea name="description" maxlength="5000" minlength="20" rows="5" required placeholder="Describe what the customer receives, size, materials or ingredients, key features, and any limitations."></textarea>
+          <small>Be specific and accurate. Include the important specifications customers need to decide.</small>
+        </label>
+        <h2 class="product-form-wide">Product specifications</h2>
+        <p class="product-form-wide">Complete every field. If a detail does not apply, enter “Not applicable” so customers know it was considered.</p>
+        <label>Brand or manufacturer
+          <input name="brand" maxlength="500" required placeholder="Brand name or Not applicable">
+        </label>
+        <label>Model or SKU
+          <input name="model" maxlength="500" required placeholder="Model/SKU or Not applicable">
+        </label>
+        <label>Size, dimensions, or weight
+          <input name="dimensions" maxlength="500" required placeholder="e.g. 30 × 20 cm, 2 kg">
+        </label>
+        <label>Materials or ingredients
+          <textarea name="materials" maxlength="500" rows="2" required placeholder="List key materials/ingredients or Not applicable"></textarea>
+        </label>
+        <label>Country or province of origin
+          <input name="origin" maxlength="500" required placeholder="Origin or Not known">
+        </label>
+        <label>Warranty and returns
+          <textarea name="warranty" maxlength="500" rows="2" required placeholder="State the warranty/return terms or No warranty/returns"></textarea>
+        </label>
+        <h2 class="product-form-wide">Delivery and pickup information</h2>
+        <p class="product-form-wide">Delivery charges are calculated at checkout from configured freight rates. Do not add a delivery charge to the product price.</p>
+        <label>Areas or provinces served
+          <textarea name="deliveryAreas" maxlength="500" rows="2" required placeholder="Briefly describe your delivery coverage"></textarea>
+        </label>
+        <fieldset class="product-form-wide province-contact-selector">
+          <legend>Local driver or skipper contact</legend>
+          <p>Required for delivery listings in this province. Pickup-only listings do not need a local contact. Customers in another province use ship or air freight instead, so local driver/skipper details will not be shown for those orders.</p>
+          <div id="deliveryProvinceOptions" class="province-options"></div>
+          <div id="deliveryProvinceContacts" class="province-contact-list"></div>
+          <input type="hidden" name="deliveryContacts">
+        </fieldset>
+        <label>Preparation or dispatch time
+          <input name="dispatchTime" maxlength="500" required placeholder="e.g. Usually dispatched within 2 business days">
+        </label>
+        <label>Estimated delivery time
+          <input name="deliveryEstimate" maxlength="500" required placeholder="e.g. 3–5 business days after dispatch">
+        </label>
+        <label>Pickup location and arrangements
+          <textarea name="pickupDetails" maxlength="500" rows="2" required placeholder="Location and how to arrange pickup, or Not available"></textarea>
+        </label>
+        <label class="product-form-wide">Delivery restrictions
+          <textarea name="deliveryRestrictions" maxlength="500" rows="2" required placeholder="List restrictions, or None"></textarea>
+        </label>
+        <label>Condition
+          <select name="condition" required>
+            <option value="new" selected>New</option>
+            <option value="used">Used</option>
+            <option value="refurbished">Refurbished</option>
+          </select>
+        </label>
+        <label>Price applies to
+          <input name="priceUnit" maxlength="40" required placeholder="e.g. each, per kg, 500 g pack">
+          <small>Clarify the quantity or size covered by the price.</small>
+        </label>
+        <label class="product-form-wide">Delivery or pickup notes
+          <textarea name="deliveryNotes" maxlength="500" rows="3" placeholder="Optional: availability area, handling, lead time, pickup arrangements, or delivery restrictions."></textarea>
+          <small>Do not include private buyer information. Delivery charges are shown at checkout.</small>
+        </label>
+        <label>Province
+          <select name="province" required>
+            <option value="NCD">National Capital District</option><option>Morobe</option><option>Western Highlands</option><option>East New Britain</option><option>Eastern Highlands</option><option>Madang</option><option>Milne Bay</option><option>East Sepik</option><option>West Sepik</option><option>Bougainville</option><option>Manus</option><option>New Ireland</option><option>West New Britain</option><option>Central</option><option>Gulf</option><option>Oro</option><option>Western</option><option>Southern Highlands</option><option>Enga</option><option>Hela</option><option>Jiwaka</option><option>Chimbu</option>
+          </select>
+        </label>
+        <label>Delivery type
+          <select name="deliveryType" required>
+            <option value="delivery">Delivery</option>
+            <option value="pickup">Pickup</option>
+            <option value="both" selected>Delivery or pickup</option>
+          </select>
+        </label>
+        <label>Price (PGK)
+          <input name="priceKina" type="number" min="0.01" max="10000000" step="0.01" required>
+        </label>
+        <label>Stock quantity
+          <input name="stockQuantity" type="number" min="0" max="1000000" step="1" required>
+        </label>
+        <label class="product-form-wide">Upload product image
+          <input name="productImage" type="file" accept="image/jpeg,image/png,image/webp">
+          <small>JPEG, PNG or WebP, up to 5 MB. The image is stored with this listing.</small>
+        </label>
+        <label class="product-form-wide">Or use an existing image URL (HTTPS)
+          <input name="imageUrl" type="url" maxlength="2000" placeholder="https://...">
+          <small>An uploaded image takes priority over this URL.</small>
+        </label>
+        <p id="productFormStatus" class="message" aria-live="polite"></p>
+        <div class="product-form-actions">
+          <button type="submit">Create listing</button>
+          <a class="btn btn-secondary" href="vendor-products.html">Cancel</a>
+        </div>
+      </form>
+    </section>
+  </main>
+  <script src="/js/marketplace.js"></script>
+</body>
+</html>

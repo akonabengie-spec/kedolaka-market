@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout | KEDOLAKA MARKET</title>
+    <meta name="description" content="PNG checkout matrix for shipping, freight, and secure payment processing." />
+  <link rel="icon" type="image/svg+xml" href="/assets/kedolaka-market-icon.svg">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#123f35">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/market-theme.css">
+  <link rel="stylesheet" href="/css/checkout.css">
+</head>
+  <body data-requires-auth="true">
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a class="brand brand-logo-link" href="/" aria-label="KEDOLAKA MARKET home"><img class="brand-logo" src="/assets/kedolaka-market-compact.svg" alt="KEDOLAKA MARKET"></a>
+
+        <div class="deliver-box" aria-label="Deliver to province">
+          <span aria-hidden="true">Delivery</span>
+          <div>
+            <div class="deliver-label">Deliver to</div>
+            <div class="deliver-value" data-deliver-to>Not selected</div>
+          </div>
+        </div>
+
+        <div class="header-tools">
+          <a class="nav-link-pill" href="login.html">Sign In</a>
+          <a class="nav-link-pill cart-pill" href="cart.html">
+            Cart
+            <span class="cart-badge" id="cartCount">0</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <nav class="main-nav">
+      <div class="container">
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="index.html#overview">Overview</a>
+          <a href="index.html#operations">Operations</a>
+          <a href="vendor-application.html">Vendor Application</a>
+        </div>
+        <div class="nav-links">
+          <a href="cart.html">Cart</a>
+          <a href="checkout.html" aria-current="page">Checkout</a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="checkout-shell">
+      <div class="container checkout-grid">
+        <section class="panel">
+          <div class="panel-body">
+            <h1 class="page-title">Checkout</h1>
+
+            <div class="section-block">
+              <div class="section-header">
+                <h2>Shipping Destination</h2>
+                <span class="step-tag">1</span>
+              </div>
+              <div class="address-grid">
+                <label class="field field-full-row">
+                  <span>Street address, suburb, or district (required)</span>
+                  <input id="deliveryAddress" type="text" placeholder="Enter at least 5 characters" minlength="5" maxlength="500" autocomplete="street-address" required />
+                </label>
+                <label class="field">
+                  <span>Delivery province (required)</span>
+                  <select id="deliveryProvince" required>
+                    <option value="" selected disabled>Select a province</option>
+                    <option value="NCD">National Capital District</option>
+                    <option value="Morobe">Morobe</option>
+                    <option value="Western Highlands">Western Highlands</option>
+                    <option value="East New Britain">East New Britain</option>
+                    <option value="Eastern Highlands">Eastern Highlands</option>
+                    <option value="Madang">Madang</option>
+                    <option value="Milne Bay">Milne Bay</option>
+                    <option value="East Sepik">East Sepik</option>
+                    <option value="West Sepik">West Sepik</option>
+                    <option value="Bougainville">Autonomous Region of Bougainville</option>
+                    <option value="Manus">Manus</option>
+                    <option value="New Ireland">New Ireland</option>
+                    <option value="West New Britain">West New Britain</option>
+                    <option value="Central">Central</option>
+                    <option value="Gulf">Gulf</option>
+                    <option value="Oro">Oro (Northern)</option>
+                    <option value="Western">Western (Fly)</option>
+                    <option value="Southern Highlands">Southern Highlands</option>
+                    <option value="Enga">Enga</option>
+                    <option value="Hela">Hela</option>
+                    <option value="Jiwaka">Jiwaka</option>
+                    <option value="Chimbu">Chimbu (Simbu)</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>PNG phone number (required)</span>
+                  <input id="deliveryPhone" type="tel" placeholder="+67570000000" pattern="\+675[78][0-9]{7}" autocomplete="tel" required />
+                </label>
+              </div>
+              <p class="muted field-full-row">Complete every required delivery field. Your name, delivery address, province, and phone number are shared with the seller to fulfill your order.</p>
+            </div>
+
+            <div class="section-block">
+              <div class="section-header">
+                <h2>Carrier Method</h2>
+                <span class="step-tag">2</span>
+              </div>
+              <div class="option-list">
+                <label class="option-card">
+                  <div>
+                    <strong>PMV</strong>
+                    <div class="muted">Within-province road delivery (driver/skipper contact)</div>
+                  </div>
+                  <input type="radio" name="carrierMethod" value="PMV" required />
+                </label>
+                <label class="option-card">
+                  <div>
+                    <strong>Ship / coastal freight</strong>
+                    <div class="muted">Inter-province sea freight</div>
+                  </div>
+                  <input type="radio" name="carrierMethod" value="Ship" required />
+                </label>
+                <label class="option-card">
+                  <div>
+                    <strong>AirNiugini</strong>
+                    <div class="muted">Inter-province air cargo</div>
+                  </div>
+                  <input type="radio" name="carrierMethod" value="AirNiugini" required />
+                </label>
+                <label class="option-card">
+                  <div>
+                    <strong>Pickup arrangement</strong>
+                    <div class="muted">Same province only, when a route is configured</div>
+                  </div>
+                  <input type="radio" name="carrierMethod" value="Pickup" required />
+                </label>
+              </div>
+            </div>
+
+            <div class="section-block">
+              <div class="section-header">
+                <h2>Who pays for delivery?</h2>
+                <span class="step-tag">3</span>
+              </div>
+              <div class="option-list">
+                <label class="option-card">
+                  <div>
+                    <strong>Buyer pays</strong>
+                    <div class="muted">Delivery cost is included in the checkout total.</div>
+                  </div>
+                  <input type="radio" name="shippingPayer" value="buyer" required />
+                </label>
+                <label class="option-card">
+                  <div>
+                    <strong>Vendor pays</strong>
+                    <div class="muted">You pay the product subtotal; the vendor covers the delivery cost.</div>
+                  </div>
+                  <input type="radio" name="shippingPayer" value="vendor" required />
+                </label>
+              </div>
+            </div>
+
+            <div class="section-block">
+              <div class="section-header">
+                <h2>Payment options by business</h2>
+                <span class="step-tag">4</span>
+              </div>
+              <div id="paymentMethods" class="option-list" aria-live="polite">Loading payment methods from your cart's businesses...</div>
+              <p id="paymentMethodStatus">Each business sets its own payment methods and instructions. Choose one method for each business; if a business accepts multiple methods, they will all be listed here. Payment stays pending until that business confirms receipt; this is not an independent payment-provider verification.</p>
+            </div>
+          </div>
+        </section>
+
+        <aside class="summary-card">
+          <h3>Order summary</h3>
+          <div id="cartItems" aria-live="polite">Loading cart...</div>
+
+          <div class="totals">
+            <div class="total-row">
+              <span>Subtotal</span>
+              <strong id="subtotalValue">K 0.00</strong>
+            </div>
+            <div class="total-row">
+              <span>Shipping</span>
+              <strong id="shippingEstimate">Configured at checkout</strong>
+            </div>
+            <div class="grand-total">
+              <span>Total</span>
+              <strong id="totalValue">K 0.00</strong>
+            </div>
+          </div>
+
+          <p id="freightQuoteStatus" aria-live="polite">Select a delivery province and carrier to check configured freight rates.</p>
+          <button id="placeOrderButton" class="btn btn-primary btn-block" type="button" disabled>Place order</button>
+          <div id="orderTracker" class="tracker" aria-live="polite">Choose a configured delivery route. The total and stock are checked again by the server before an order is saved.</div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-inner">
+        <p class="checkout-footer-copy">© 2026 KEDOLAKA MARKET | PNG commerce infrastructure</p>
+        <nav>
+          <a href="login.html">Sign In</a>
+          <a href="index.html">Marketplace</a>
+          <a href="vendor-dashboard.html">Vendor Dashboard</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script src="/js/marketplace.js"></script>
+  </body>
+</html>

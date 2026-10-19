@@ -1,0 +1,31 @@
+body:has(#profileForm) main.container {
+  width: min(820px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+body:has(#profileForm) main.container > dl {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.35fr) 1fr;
+  gap: 10px 18px;
+  padding: 18px;
+  border: 1px solid var(--brand-line);
+  border-radius: 16px;
+  background: var(--brand-card);
+}
+
+body:has(#profileForm) main.container > dl dt {
+  color: var(--brand-muted);
+  font-weight: 650;
+}
+
+body:has(#profileForm) main.container > dl dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+#profileForm {
+  padding: 20px;
+  border: 1px solid var(--brand-line);
+  border-radius: 16px;
+  background: var(--brand-card);
+}

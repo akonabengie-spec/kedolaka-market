@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">KEDOLAKA MARKET crossroads icon</title>
+  <rect width="128" height="128" rx="28" fill="#123f35"/>
+  <path d="M64 7v31c0 10-8 18-18 18H7m114 0H82c-10 0-18-8-18-18V7M64 121V90c0-10 8-18 18-18h39M7 72h39c10 0 18 8 18 18v31" fill="none" stroke="#f5f0df" stroke-linecap="round" stroke-linejoin="round" stroke-width="10"/>
+  <circle cx="64" cy="64" r="24" fill="#e5ae53" stroke="#123f35" stroke-width="4"/>
+  <path d="M51 59h26l-3 18H54l-3-18Zm-2-6 3 6m23-6-3 6M56 55l3-5m13 5-3-5" fill="none" stroke="#123f35" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+  <circle cx="64" cy="50" r="4" fill="#d56e4e"/>
+  <path d="M65 46c-1-4 1-6 4-8" fill="none" stroke="#123f35" stroke-linecap="round" stroke-width="2.5"/>
+</svg>

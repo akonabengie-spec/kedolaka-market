@@ -1,0 +1,41 @@
+.help-page,
+.contact-page {
+  padding-block: 26px 48px;
+}
+
+.help-page > p,
+.contact-page > p {
+  max-width: 820px;
+  line-height: 1.7;
+}
+
+.help-page a,
+.contact-page a {
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+
+.support-contact {
+  max-width: 820px;
+  margin-block: 24px;
+  padding: clamp(18px, 3vw, 26px);
+  border: 1px solid var(--brand-line);
+  border-radius: 16px;
+  background: var(--brand-card);
+  box-shadow: var(--brand-shadow);
+}
+
+.support-contact h2 {
+  margin-top: 0;
+  color: var(--brand-forest-deep);
+}
+
+.support-contact ul {
+  display: grid;
+  gap: 10px;
+  padding-left: 20px;
+}
+
+.support-contact [data-support-contact-empty] {
+  color: var(--brand-muted);
+}

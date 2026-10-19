@@ -1,0 +1,139 @@
+.vendor-product-form-page {
+  width: min(820px, calc(100% - 32px));
+  padding-block: 28px 48px;
+}
+
+.vendor-product-form-page h1 {
+  margin-block: 18px 10px;
+  color: var(--brand-forest-deep);
+}
+
+.vendor-product-form-page .workspace-panel {
+  margin-top: 22px;
+}
+
+.vendor-product-form-page .workspace-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.vendor-product-form-page .workspace-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-weight: 650;
+}
+
+.vendor-product-form-page .workspace-form label:nth-child(3),
+.vendor-product-form-page .product-form-wide,
+.vendor-product-form-page .product-form-actions,
+.vendor-product-form-page #productFormStatus {
+  grid-column: 1 / -1;
+}
+
+.vendor-product-form-page .workspace-form h2,
+.vendor-product-form-page .workspace-form p {
+  margin: 4px 0 0;
+}
+
+.vendor-product-form-page .workspace-form fieldset {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--brand-line);
+  border-radius: 12px;
+}
+
+.vendor-product-form-page .province-contact-selector legend {
+  padding-inline: 6px;
+  font-weight: 700;
+}
+
+.vendor-product-form-page .workspace-form p {
+  color: var(--brand-muted);
+}
+
+.province-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+  margin-block: 12px;
+}
+
+.province-options label {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+}
+
+.province-options input {
+  width: auto !important;
+}
+
+.province-contact-list {
+  display: grid;
+  gap: 12px;
+}
+
+.province-contact {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--brand-line);
+  border-radius: 10px;
+}
+
+.province-contact h3,
+.province-contact p {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.vendor-product-form-page .workspace-form input,
+.vendor-product-form-page .workspace-form select,
+.vendor-product-form-page .workspace-form textarea {
+  width: 100%;
+  padding: 11px 12px;
+}
+
+.vendor-product-form-page .workspace-form textarea {
+  resize: vertical;
+}
+
+.vendor-product-form-page .workspace-form small {
+  color: var(--brand-muted);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.product-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.product-form-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 16px;
+}
+
+@media (max-width: 600px) {
+  .vendor-product-form-page .workspace-form {
+    grid-template-columns: 1fr;
+  }
+
+  .vendor-product-form-page .workspace-form label,
+  .vendor-product-form-page .workspace-form fieldset,
+  .vendor-product-form-page .product-form-actions,
+  .vendor-product-form-page #productFormStatus {
+    grid-column: 1;
+  }
+
+  .province-contact {
+    grid-template-columns: 1fr;
+  }
+}

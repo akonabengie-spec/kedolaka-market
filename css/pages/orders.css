@@ -1,0 +1,67 @@
+#orderHistory,
+#orderDetail,
+#paymentPageStatus,
+#orderConfirmation {
+  margin-block: 18px;
+}
+
+#orderHistory > article,
+#orderHistory > li,
+.order-panel,
+#orderConfirmation {
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid var(--brand-line);
+  border-radius: 16px;
+  background: var(--brand-card);
+  box-shadow: var(--brand-shadow);
+}
+
+#orderHistory {
+  display: grid;
+  gap: 12px;
+}
+
+.order-shell {
+  width: min(900px, calc(100% - 32px));
+  margin: 28px auto;
+}
+
+.order-panel {
+  margin-top: 20px;
+}
+
+.checkout-confirmation-order {
+  display: grid;
+  gap: 6px;
+}
+
+.checkout-confirmation-order h2,
+.checkout-confirmation-order p {
+  margin-block: 4px;
+}
+
+.checkout-confirmation-order a {
+  width: fit-content;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+}
+
+.order-items {
+  display: grid;
+  gap: 8px;
+  padding-left: 22px;
+}
+
+.order-status,
+#paymentPageStatus {
+  padding: 14px;
+  border: 1px solid #cbd9ce;
+  border-radius: 13px;
+  background: #eef4ed;
+}
+
+#cancelOrderButton {
+  margin-block: 12px;
+}

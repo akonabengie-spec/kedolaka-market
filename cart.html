@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shopping cart | KEDOLAKA MARKET</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/kedolaka-market-icon.svg">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#123f35">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/market-theme.css">
+  <link rel="stylesheet" href="/css/pages/cart.css">
+</head>
+<body data-requires-auth="true">
+  <header class="topbar">
+    <a class="brand brand-logo-link" href="/" aria-label="KEDOLAKA MARKET home"><img class="brand-logo" src="/assets/kedolaka-market-compact.svg" alt="KEDOLAKA MARKET"></a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="index.html">Home</a><a href="/products">Shop</a>
+      <a href="account.html">Account</a><a href="orders.html">My orders</a>
+      <a href="cart.html" aria-current="page">Cart <span class="cart-badge">0</span></a>
+    </nav>
+  </header>
+  <main class="container">
+    <nav aria-label="Breadcrumb"><a href="index.html">Home</a> / Cart</nav>
+    <h1>Your shopping cart</h1>
+    <p id="cartPageMessage" class="message" aria-live="polite">Review quantities before checkout.</p>
+    <div class="cart-layout">
+      <section aria-label="Items in your cart">
+        <div id="cartItems" aria-live="polite">Loading cart...</div>
+      </section>
+      <aside class="cart-summary" aria-labelledby="cartSummaryHeading">
+        <h2 id="cartSummaryHeading">Order summary</h2>
+        <dl>
+          <div><dt>Items subtotal</dt><dd id="subtotalValue">K 0.00</dd></div>
+          <div><dt>Delivery</dt><dd id="shippingEstimate">Calculated at checkout</dd></div>
+          <div class="cart-total"><dt>Estimated total</dt><dd id="totalValue">Calculated at checkout</dd></div>
+        </dl>
+        <a id="cartCheckoutLink" class="btn btn-primary" href="checkout.html" aria-disabled="true">Continue to checkout</a>
+        <p>Delivery fees and final stock availability are confirmed at checkout.</p>
+        <a href="/products">Continue shopping</a>
+      </aside>
+    </div>
+  </main>
+  <footer><a href="help.html">Help and contact</a></footer>
+  <script src="/js/marketplace.js"></script>
+</body>
+</html>

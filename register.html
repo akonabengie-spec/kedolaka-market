@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Create account | KEDOLAKA MARKET</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/kedolaka-market-icon.svg">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#123f35">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/market-theme.css">
+  <link rel="stylesheet" href="/css/pages/auth.css">
+</head>
+<body><header class="topbar"><a class="brand brand-logo-link" href="/" aria-label="KEDOLAKA MARKET home"><img class="brand-logo" src="/assets/kedolaka-market-compact.svg" alt="KEDOLAKA MARKET"></a><nav class="main-nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="login.html">Sign in</a></nav></header>
+<main class="container"><nav aria-label="Breadcrumb"><a href="index.html">Home</a> / Register</nav><h1>Create account</h1><p>PNG mobile numbers use +675 followed by eight digits. Vendor applications require approval before listings can go live.</p>
+  <form id="registerForm">
+    <section class="registration-step" data-registration-step="1" aria-labelledby="registrationStepOneHeading">
+      <h2 id="registrationStepOneHeading" tabindex="-1">Your details</h2>
+      <label>Full name<input id="fullName" name="fullName" autocomplete="name" minlength="2" maxlength="150" required></label>
+      <label>Email<input id="registerEmail" name="email" type="email" autocomplete="email" required></label>
+      <label>PNG mobile number<input id="registerPhone" name="phoneNumber" type="tel" placeholder="+67570000000" pattern="\+675[78][0-9]{7}" autocomplete="tel" required></label>
+      <label>Password<input id="registerPassword" name="password" type="password" minlength="10" maxlength="72" autocomplete="new-password" required></label>
+      <label>Confirm password<input id="confirmPassword" type="password" minlength="10" maxlength="72" autocomplete="new-password" required></label>
+      <button type="button" id="registrationNext">Next</button>
+    </section>
+    <section class="registration-step" data-registration-step="2" aria-labelledby="registrationStepTwoHeading" hidden>
+      <h2 id="registrationStepTwoHeading" tabindex="-1">Account setup</h2>
+      <label>Account type<select id="registerRole" name="role" required><option value="buyer">Customer</option><option value="vendor">Vendor applicant</option></select></label>
+      <label>Home province<select id="registerProvince" name="homeProvince" required><option value="NCD">National Capital District</option><option>Morobe</option><option>Western Highlands</option><option>East New Britain</option><option>Eastern Highlands</option><option>Madang</option><option>Milne Bay</option><option>East Sepik</option><option>West Sepik</option><option>Bougainville</option><option>Manus</option><option>New Ireland</option><option>West New Britain</option><option>Central</option><option>Gulf</option><option>Oro</option><option>Western</option><option>Southern Highlands</option><option>Enga</option><option>Hela</option><option>Jiwaka</option><option>Chimbu</option></select></label>
+      <section id="registrationVendorSetup" class="vendor-payment-setup" hidden>
+        <h3>Business and payment setup</h3>
+        <p>Tell customers how to pay your business. Provide instructions you are comfortable sharing publicly. Never enter passwords, card details, or account security credentials. You can edit these options later.</p>
+        <label>Business name<input id="registerBusinessName" name="businessName" minlength="2" maxlength="180"></label>
+        <label>Business province<select id="registerBusinessProvince" name="businessProvince"><option value="NCD">National Capital District</option><option>Morobe</option><option>Western Highlands</option><option>East New Britain</option><option>Eastern Highlands</option><option>Madang</option><option>Milne Bay</option><option>East Sepik</option><option>West Sepik</option><option>Bougainville</option><option>Manus</option><option>New Ireland</option><option>West New Britain</option><option>Central</option><option>Gulf</option><option>Oro</option><option>Western</option><option>Southern Highlands</option><option>Enga</option><option>Hela</option><option>Jiwaka</option><option>Chimbu</option></select></label>
+        <div id="registrationPaymentMethods" data-vendor-payment-methods></div>
+      </section>
+      <div class="registration-step-actions">
+        <button type="button" id="registrationBack" class="btn btn-secondary">Back</button>
+        <button type="submit" id="registrationSubmit">Create account</button>
+      </div>
+    </section>
+    <p id="registerStatus" class="message" aria-live="polite"></p>
+  </form>
+  <p>Already registered? <a href="login.html">Sign in</a></p>
+</main><script src="/js/marketplace.js"></script></body></html>

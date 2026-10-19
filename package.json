@@ -1,0 +1,32 @@
+{
+  "name": "kedolaka-market",
+  "version": "1.0.0",
+  "description": "KEDOLAKA MARKET PNG marketplace with PostgreSQL-backed listings, orders, inventory reservations, and manual payment verification.",
+  "main": "server/api.js",
+  "scripts": {
+    "start": "node server/api.js",
+    "dev": "node --watch server/api.js",
+    "db:migrate": "node server/migrate.js",
+    "db:setup": "node server/migrate.js --initialize-schema",
+    "test": "npm run test:unit && npm run test:api && npm run test:e2e",
+    "test:unit": "node --test test/payments.test.js test/mail.test.js",
+    "test:api": "node scripts/verify-test-database.js && node --test test/auth.test.js test/marketplace.test.js test/routes.test.js",
+    "test:e2e": "node scripts/verify-test-database.js && node --test test/e2e.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.0",
+    "express": "^4.19.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "multer": "^2.4.0",
+    "nodemailer": "^10.1.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
+}

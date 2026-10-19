@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Products | KEDOLAKA MARKET</title>
+  <meta name="description" content="Search and browse current KEDOLAKA MARKET product listings.">
+  <link rel="icon" type="image/svg+xml" href="/assets/kedolaka-market-icon.svg">
+  <link rel="apple-touch-icon" href="/assets/kedolaka-market-icon-180.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#123f35">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/market-theme.css">
+  <link rel="stylesheet" href="/css/pages/products.css">
+</head>
+<body class="products-store-page">
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand brand-logo-link" href="/" aria-label="KEDOLAKA MARKET home"><img class="brand-logo" src="/assets/kedolaka-market-compact.svg" alt="KEDOLAKA MARKET"></a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/products" aria-current="page">Products</a>
+        <a href="/help.html">Help</a>
+        <a href="/cart.html">Cart</a>
+      </nav>
+    </div>
+  </header>
+  <main class="products-page container">
+    <nav class="products-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><span>Products</span></nav>
+    <header class="products-heading">
+      <p class="eyebrow">Find your next favorite</p>
+      <h1>Shop products across PNG</h1>
+      <p>Discover listings from businesses around Papua New Guinea. Compare prices, stock and delivery options before you choose.</p>
+    </header>
+    <form id="productsFilters" class="products-filters" action="/products" method="get" role="search">
+      <div class="products-filter-field">
+        <label for="productsSearch">Search products</label>
+        <input id="productsSearch" name="q" type="search" maxlength="100" placeholder="What are you looking for?">
+      </div>
+      <div class="products-filter-field">
+        <label for="productsCategory">Category</label>
+        <select id="productsCategory" name="category">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+      <div class="products-filter-field">
+        <label for="productsMinPrice">Minimum price (K)</label>
+        <input id="productsMinPrice" name="minPrice" type="number" min="0" max="10000000" step="0.01" placeholder="No minimum">
+      </div>
+      <div class="products-filter-field">
+        <label for="productsMaxPrice">Maximum price (K)</label>
+        <input id="productsMaxPrice" name="maxPrice" type="number" min="0" max="10000000" step="0.01" placeholder="No maximum">
+      </div>
+      <div class="products-filter-field">
+        <label for="productsSort">Sort by</label>
+        <select id="productsSort" name="sort">
+          <option value="newest">Newly listed</option>
+          <option value="price_asc">Price: low to high</option>
+          <option value="price_desc">Price: high to low</option>
+          <option value="name_asc">Name: A to Z</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" type="submit">Apply filters</button>
+      <a class="products-clear" href="/products">Clear filters</a>
+    </form>
+    <p id="productsCategoryStatus" class="products-status" aria-live="polite"></p>
+    <section aria-labelledby="productsResultsHeading" aria-busy="false" id="productsResults">
+      <div class="products-results-heading">
+        <h2 id="productsResultsHeading">Shop all listings</h2>
+        <p id="productsResultCount" aria-live="polite"></p>
+      </div>
+      <div id="productsGrid" class="products-grid" aria-live="polite"></div>
+      <div id="productsFeedback" class="products-feedback" role="status" hidden></div>
+      <div class="products-pagination">
+        <button id="productsPrevious" class="btn btn-secondary" type="button" disabled>Previous</button>
+        <span id="productsPageLabel" aria-live="polite"></span>
+        <button id="productsNext" class="btn btn-secondary" type="button" disabled>Next</button>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>KEDOLAKA MARKET</p>
+      <div class="footer-links"><a href="/">Home</a><a href="/help.html">Help</a></div>
+    </div>
+  </footer>
+  <script src="/js/marketplace.js"></script>
+  <script src="/js/pages/products.js"></script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KEDOLAKA MARKET | PNG Marketplace</title>
+    <meta name="description" content="Browse genuine listings from approved vendors on KEDOLAKA MARKET." />
+  <link rel="icon" type="image/svg+xml" href="/assets/kedolaka-market-icon.svg">
+  <link rel="apple-touch-icon" href="/assets/kedolaka-market-icon-180.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#123f35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="KEDOLAKA">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/market-theme.css">
+  <link rel="stylesheet" href="/css/home.css">
+</head>
+  <body class="home-store-page">
+    <header class="topbar home-store-header">
+      <div class="container topbar-inner">
+        <a class="brand brand-logo-link" href="/" aria-label="KEDOLAKA MARKET home"><img class="brand-logo" src="/assets/kedolaka-market-compact.svg" alt="KEDOLAKA MARKET"></a>
+
+        <div class="deliver-box" aria-label="Deliver to province selector">
+          <span>📍</span>
+          <div>
+            <div class="deliver-label">Deliver to</div>
+            <div class="deliver-value" data-deliver-to>Not selected</div>
+          </div>
+        </div>
+
+        <div class="search-shell home-search" role="search">
+          <input id="keywordSearch" type="search" aria-label="Search products" placeholder="Search products, brands and more" />
+          <select aria-label="Category selector" id="categoryFilter">
+            <option value="all">All Categories</option>
+          </select>
+          <select id="provinceFilter" aria-label="Province selector">
+            <option value="all">All Provinces</option>
+            <option value="NCD">National Capital District</option>
+            <option value="Morobe">Morobe</option>
+            <option value="Western Highlands">Western Highlands</option>
+            <option value="East New Britain">East New Britain</option>
+            <option value="Eastern Highlands">Eastern Highlands</option>
+            <option value="Madang">Madang</option>
+            <option value="Milne Bay">Milne Bay</option>
+            <option value="East Sepik">East Sepik</option>
+            <option value="West Sepik">West Sepik</option>
+            <option value="Bougainville">Autonomous Region of Bougainville</option>
+            <option value="Manus">Manus</option>
+            <option value="New Ireland">New Ireland</option>
+            <option value="West New Britain">West New Britain</option>
+            <option value="Central">Central</option>
+            <option value="Gulf">Gulf</option>
+            <option value="Oro">Oro (Northern)</option>
+            <option value="Western">Western (Fly)</option>
+            <option value="Southern Highlands">Southern Highlands</option>
+            <option value="Enga">Enga</option>
+            <option value="Hela">Hela</option>
+            <option value="Jiwaka">Jiwaka</option>
+            <option value="Chimbu">Chimbu (Simbu)</option>
+          </select>
+          <select id="sortFilter" aria-label="Sort products">
+            <option value="newest">Newest</option>
+            <option value="price_asc">Price: low to high</option>
+            <option value="price_desc">Price: high to low</option>
+            <option value="name_asc">Name: A to Z</option>
+          </select>
+          <input id="minimumPriceFilter" type="text" inputmode="decimal" pattern="(0|[1-9][0-9]{0,7})(\.[0-9]{1,2})?" aria-label="Minimum price in Kina" placeholder="Min K" />
+          <input id="maximumPriceFilter" type="text" inputmode="decimal" pattern="(0|[1-9][0-9]{0,7})(\.[0-9]{1,2})?" aria-label="Maximum price in Kina" placeholder="Max K" />
+          <a id="homeSearchSubmit" class="home-search-submit" href="/products">Search</a>
+        </div>
+        <div class="header-actions">
+          <a class="nav-button" href="/products">Browse products</a>
+          <button class="nav-button" id="authToggle" type="button">Sign In</button>
+          <a class="cart-button" href="cart.html" aria-label="Shopping cart">
+            Cart
+            <span class="cart-badge" id="cartCount">0</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <nav class="main-nav">
+      <div class="container">
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <section class="hero storefront-hero" id="overview">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <span class="eyebrow">Your PNG marketplace</span>
+            <h1>Find something good. Shop local.</h1>
+            <p>Explore products from businesses across Papua New Guinea, compare listings and choose what works for you.</p>
+            <div class="storefront-actions">
+              <a class="btn btn-primary" href="/products">Browse all products</a>
+              <a class="btn btn-secondary" href="register.html?role=vendor">Start selling</a>
+            </div>
+            <div class="storefront-benefits" aria-label="Shopping information">
+              <span>Products from local businesses</span>
+              <span>Delivery options on each listing</span>
+              <span>Payment choices shown at checkout</span>
+            </div>
+          </div>
+
+          <aside class="storefront-promo" aria-label="Marketplace introduction">
+            <div class="storefront-promo-art" aria-hidden="true">
+              <span class="promo-orbit promo-orbit-one"></span>
+              <span class="promo-orbit promo-orbit-two"></span>
+              <span class="promo-basket">PNG</span>
+            </div>
+            <div class="storefront-promo-copy">
+              <span>Made for shopping across PNG</span>
+              <strong>Browse. Choose. Connect.</strong>
+              <a href="/products">See what’s available <span aria-hidden="true">→</span></a>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="operations">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Picked from the marketplace</span>
+              <h2>Explore products</h2>
+            </div>
+            <a class="storefront-view-all" href="/products">View all products <span aria-hidden="true">→</span></a>
+          </div>
+
+          <div id="featuredCategories" class="category-strip" aria-label="Browse product categories"></div>
+          <div id="productGrid" class="empty-product-grid" aria-live="polite">Product listings will appear here when vendors publish them.</div>
+          <p id="categoryStatus" class="status-text" aria-live="polite"></p>
+
+          <div class="management-grid management-grid-spaced">
+            <div class="panel storefront-panel">
+              <span class="eyebrow">Personalize your shopping</span>
+              <h3>Set your delivery province</h3>
+              <p>See your selected location in the marketplace. Signed-in updates are saved to your account.</p>
+              <div class="stack-form">
+                <label>
+                  <span>Session province</span>
+                  <select id="sessionProvinceSelect">
+                    <option value="NCD">National Capital District</option>
+                    <option value="Morobe">Morobe</option>
+                    <option value="Western Highlands">Western Highlands</option>
+                    <option value="East New Britain">East New Britain</option>
+                    <option value="Eastern Highlands">Eastern Highlands</option>
+                    <option value="Madang">Madang</option>
+                    <option value="Milne Bay">Milne Bay</option>
+                    <option value="East Sepik">East Sepik</option>
+                    <option value="West Sepik">West Sepik</option>
+                    <option value="Bougainville">Autonomous Region of Bougainville</option>
+                    <option value="Manus">Manus</option>
+                    <option value="New Ireland">New Ireland</option>
+                    <option value="West New Britain">West New Britain</option>
+                    <option value="Central">Central</option>
+                    <option value="Gulf">Gulf</option>
+                    <option value="Oro">Oro (Northern)</option>
+                    <option value="Western">Western (Fly)</option>
+                    <option value="Southern Highlands">Southern Highlands</option>
+                    <option value="Enga">Enga</option>
+                    <option value="Hela">Hela</option>
+                    <option value="Jiwaka">Jiwaka</option>
+                    <option value="Chimbu">Chimbu (Simbu)</option>
+                  </select>
+                </label>
+                <button id="provinceSetButton" class="btn btn-primary" type="button">Apply province</button>
+                <div id="statusUpdate" class="status-text" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="panel storefront-seller-panel">
+              <span class="eyebrow">For PNG businesses</span>
+              <h3>Bring your products to more customers</h3>
+              <p>Open a vendor account, set up your listings and connect with buyers around the country.</p>
+              <div class="stack-form">
+                <a class="btn btn-secondary" href="register.html?role=vendor">Start selling</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-inner">
+        <p class="home-footer-copy">© 2026 KEDOLAKA MARKET | PNG marketplace</p>
+        <div class="footer-links">
+          <a href="account.html">Account</a>
+          <a href="orders.html">My orders</a>
+          <a href="checkout.html">Checkout</a>
+          <a href="vendor-dashboard.html">Vendor Dashboard</a>
+          <a href="help.html">Help</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/js/marketplace.js"></script>
+  </body>
+</html>

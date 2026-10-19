@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 510 100" role="img" aria-labelledby="title">
+  <title id="title">KEDOLAKA MARKET</title>
+  <rect x="2" y="2" width="96" height="96" rx="25" fill="#f5f0df"/>
+  <path d="M50 8v20c0 8-6 14-14 14H8m84 0H64c-8 0-14-6-14-14V8M50 92V72c0-8 6-14 14-14h28M8 58h28c8 0 14 6 14 14v20" fill="none" stroke="#123f35" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+  <circle cx="50" cy="50" r="20" fill="#e5ae53" stroke="#f5f0df" stroke-width="3"/>
+  <path d="M39 47h22l-2 15H41l-2-15Zm-1-5 2 5m20-5-2 5m-16-4 4-5m10 5-4-5" fill="none" stroke="#123f35" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"/>
+  <circle cx="50" cy="40" r="3" fill="#d56e4e"/>
+  <path d="M51 37c0-3 2-4 4-6" fill="none" stroke="#123f35" stroke-linecap="round" stroke-width="2"/>
+  <text x="116" y="47" fill="#ffffff" font-family="Segoe UI,Arial,sans-serif" font-size="30" font-weight="800" letter-spacing="1.4">KEDOLAKA</text>
+  <text x="118" y="76" fill="#f5f0df" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="4">MARKET</text>
+</svg>

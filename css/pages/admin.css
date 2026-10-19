@@ -1,0 +1,120 @@
+body[data-requires-role="admin"] main.container {
+  padding-bottom: 48px;
+}
+
+body[data-requires-role="admin"] main.container > section,
+body[data-requires-role="admin"] main.container > ul,
+body[data-requires-role="admin"] main.container > nav[aria-label="Administrative tools"] {
+  margin-top: 18px;
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid var(--brand-line);
+  border-radius: 16px;
+  background: var(--brand-card);
+  box-shadow: var(--brand-shadow);
+}
+
+body[data-requires-role="admin"] main.container > ul {
+  display: grid;
+  gap: 12px;
+  padding-left: 38px;
+}
+
+body[data-requires-role="admin"] main.container nav[aria-label="Administrative tools"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+body[data-requires-role="admin"] main.container nav[aria-label="Administrative tools"] a {
+  padding: 11px 14px;
+  border: 1px solid var(--brand-line);
+  border-radius: 11px;
+  background: var(--brand-forest-soft);
+  font-weight: 700;
+}
+
+.admin-row,
+.admin-section,
+.admin-actions,
+.admin-form {
+  min-width: 0;
+}
+
+.admin-row {
+  overflow-wrap: anywhere;
+}
+
+#adminAnalytics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+#adminAnalytics p {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--brand-line);
+  border-radius: 8px;
+  background: #f7f9fc;
+}
+
+#adminAnalytics strong {
+  font-size: 1.25rem;
+}
+
+.admin-order-edit,
+.admin-order-refund,
+.vendor-shipment-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  width: 100%;
+  margin-block: 12px;
+}
+
+.admin-order-edit label,
+.vendor-shipment-form label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.admin-order-edit input,
+.admin-order-refund input,
+.admin-order-refund select,
+.vendor-shipment-form input,
+.vendor-shipment-form textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--brand-line);
+  border-radius: 6px;
+}
+
+.vendor-shipment-form textarea {
+  resize: vertical;
+}
+
+.admin-order-edit button,
+.admin-order-refund button,
+.vendor-shipment-form button {
+  align-self: end;
+  min-height: 42px;
+}
+
+@media (max-width: 600px) {
+  .admin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .admin-order-edit,
+  .admin-order-refund,
+  .vendor-shipment-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
