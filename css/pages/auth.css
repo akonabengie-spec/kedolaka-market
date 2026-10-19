@@ -24,6 +24,32 @@ body:has(#resetPasswordForm) main.container {
   width: 100%;
 }
 
+.password-field {
+  display: flex;
+  align-items: stretch;
+}
+
+.password-field input {
+  flex: 1;
+  min-width: 0;
+}
+
+#signInForm .password-field .password-visibility-toggle {
+  width: auto;
+  flex: 0 0 auto;
+  padding-inline: 14px;
+  border: 1px solid var(--brand-line);
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  background: var(--brand-card);
+  color: var(--brand-forest-deep);
+  font: inherit;
+}
+
+.password-field input {
+  border-radius: 10px 0 0 10px;
+}
+
 body:has(#registerForm) #registerForm {
   display: block;
 }

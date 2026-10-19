@@ -79,6 +79,9 @@ test('public page aliases, assets, and unauthenticated API guards are reachable'
       assert.match(html, /href="\/assets\/kedolaka-market-icon\.svg"/, `${file} uses the new favicon`);
       assert.match(html, /href="\/site\.webmanifest"/, `${file} uses the KEDOLAKA app manifest`);
       assert.match(html, /src="\/assets\/kedolaka-market-compact\.svg"/, `${file} uses the new header logo`);
+      if (file === 'login.html' || file === 'auth-flow.html') {
+        assert.match(html, /class="password-visibility-toggle"[^>]*aria-controls="signInPassword"/, `${file} provides a sign-in password visibility control`);
+      }
       if (file === 'products.html') assert.ok(scripts.includes('/js/pages/products.js'), `${file} has Products page JavaScript`);
       assert.doesNotMatch(html, /<style\b/i, `${file} keeps styling in CSS files`);
       for (const asset of stylesheets.concat(scripts)) {

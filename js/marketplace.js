@@ -1047,6 +1047,17 @@
   }
 
   function bindAuthForms() {
+    document.querySelectorAll('.password-visibility-toggle').forEach(function (toggle) {
+      toggle.addEventListener('click', function () {
+        const input = document.getElementById(toggle.getAttribute('aria-controls'));
+        if (!input) return;
+        const revealed = input.type === 'password';
+        input.type = revealed ? 'text' : 'password';
+        toggle.textContent = revealed ? 'Hide' : 'Show';
+        toggle.setAttribute('aria-pressed', String(revealed));
+      });
+    });
+
     const signIn = document.getElementById('signInForm');
     if (signIn) signIn.addEventListener('submit', async function (event) {
       event.preventDefault();
