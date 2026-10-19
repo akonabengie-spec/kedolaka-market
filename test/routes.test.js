@@ -170,6 +170,12 @@ test('public page aliases, assets, and unauthenticated API guards are reachable'
     const legacyReset = await fetch(baseUrl + '/auth.html?reset=legacy-token', { redirect: 'manual' });
     assert.equal(legacyReset.status, 302);
     assert.equal(legacyReset.headers.get('location'), '/reset-password.html?reset=legacy-token');
+    const sameOriginRequest = await fetch(baseUrl + '/api/auth/logout', {
+      method: 'POST',
+      headers: { Origin: baseUrl }
+    });
+    assert.equal(sameOriginRequest.status, 401);
+    assert.equal(sameOriginRequest.headers.get('access-control-allow-origin'), baseUrl);
     const rejectedOrigin = await fetch(baseUrl + '/api/auth/logout', {
       method: 'POST',
       headers: { Origin: 'https://untrusted.example' }

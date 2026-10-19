@@ -86,6 +86,21 @@ const MANUAL_PAYMENT_METHODS = new Set(Object.keys(VENDOR_PAYMENT_METHODS).map(f
 const origins = new Set((process.env.CORS_ORIGINS || `http://localhost:${PORT}`)
   .split(',').map(function (origin) { return origin.trim(); }).filter(Boolean));
 
+function isAllowedOrigin(origin, req) {
+  if (!origin || origins.has(origin)) return true;
+  try {
+    const parsedOrigin = new URL(origin);
+    const forwardedProtocol = req.get('x-forwarded-proto');
+    const requestProtocol = (forwardedProtocol ? forwardedProtocol.split(',')[0].trim() : req.protocol) + ':';
+    return parsedOrigin.origin === origin &&
+      parsedOrigin.host === req.get('host') &&
+      parsedOrigin.protocol === requestProtocol;
+  } catch (error) {
+    if (error instanceof TypeError) return false;
+    throw error;
+  }
+}
+
 function availableStockSql(productAlias) {
   return `GREATEST(${productAlias}.stock_quantity - COALESCE((
     SELECT SUM(ir.quantity) FROM inventory_reservations ir
@@ -121,17 +136,13 @@ app.use(helmet({
     }
   }
 }));
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || origins.has(origin)) return callback(null, true);
-    return callback(null, false);
-  },
-  credentials: true
+app.use(cors(function (req, callback) {
+  callback(null, { origin: isAllowedOrigin(req.get('Origin'), req), credentials: true });
 }));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 app.use(function (req, res, next) {
-  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) && req.headers.origin && !origins.has(req.headers.origin)) {
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) && !isAllowedOrigin(req.get('Origin'), req)) {
     return res.status(403).json(errorResponse(403, 'origin_not_allowed', 'Request origin is not allowed.'));
   }
   return next();
