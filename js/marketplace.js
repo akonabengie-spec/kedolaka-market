@@ -1053,8 +1053,9 @@
         if (!input) return;
         const revealed = input.type === 'password';
         input.type = revealed ? 'text' : 'password';
-        toggle.textContent = revealed ? 'Hide' : 'Show';
+        toggle.setAttribute('aria-label', revealed ? 'Hide password' : 'Show password');
         toggle.setAttribute('aria-pressed', String(revealed));
+        toggle.classList.toggle('is-visible', revealed);
       });
     });
 

@@ -80,7 +80,8 @@ test('public page aliases, assets, and unauthenticated API guards are reachable'
       assert.match(html, /href="\/site\.webmanifest"/, `${file} uses the KEDOLAKA app manifest`);
       assert.match(html, /src="\/assets\/kedolaka-market-compact\.svg"/, `${file} uses the new header logo`);
       if (file === 'login.html' || file === 'auth-flow.html') {
-        assert.match(html, /class="password-visibility-toggle"[^>]*aria-controls="signInPassword"/, `${file} provides a sign-in password visibility control`);
+        assert.match(html, /class="password-visibility-toggle"[^>]*aria-controls="signInPassword"[^>]*aria-label="Show password"/, `${file} provides an accessible sign-in password visibility control`);
+        assert.match(html, /<svg viewBox="0 0 24 24" aria-hidden="true"/, `${file} uses an eye icon for password visibility`);
       }
       if (file === 'products.html') assert.ok(scripts.includes('/js/pages/products.js'), `${file} has Products page JavaScript`);
       assert.doesNotMatch(html, /<style\b/i, `${file} keeps styling in CSS files`);
@@ -186,6 +187,13 @@ test('public page aliases, assets, and unauthenticated API guards are reachable'
     assert.equal(vercelOriginRequest.status, 401);
     assert.equal(vercelOriginRequest.headers.get('access-control-allow-origin'), 'https://vercel.app');
     assert.equal(vercelOriginRequest.headers.get('access-control-allow-credentials'), 'true');
+    const productionOriginRequest = await fetch(baseUrl + '/api/auth/logout', {
+      method: 'POST',
+      headers: { Origin: 'https://kedolaka-market.vercel.app' }
+    });
+    assert.equal(productionOriginRequest.status, 401);
+    assert.equal(productionOriginRequest.headers.get('access-control-allow-origin'), 'https://kedolaka-market.vercel.app');
+    assert.equal(productionOriginRequest.headers.get('access-control-allow-credentials'), 'true');
     const rejectedOrigin = await fetch(baseUrl + '/api/auth/logout', {
       method: 'POST',
       headers: { Origin: 'https://untrusted.example' }

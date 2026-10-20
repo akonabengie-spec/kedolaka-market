@@ -86,6 +86,7 @@ const MANUAL_PAYMENT_METHODS = new Set(Object.keys(VENDOR_PAYMENT_METHODS).map(f
 const origins = new Set([
   `http://localhost:${PORT}`,
   'https://vercel.app',
+  'https://kedolaka-market.vercel.app',
   ...(process.env.CORS_ORIGINS || '').split(',')
 ].map(function (origin) { return origin.trim(); }).filter(Boolean));
 
