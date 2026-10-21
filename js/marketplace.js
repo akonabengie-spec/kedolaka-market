@@ -4,6 +4,9 @@
   let currentUser = null;
   let sessionError = null;
   let cartItems = [];
+  let cartLoadRequest = 0;
+  let checkoutContactRequest = 0;
+  let checkoutLocalContactsReady = true;
   let catalogOffset = 0;
   let catalogTimer = null;
   let freightQuoteRequest = 0;
@@ -146,8 +149,12 @@
       address.value.trim().length >= 5 && address.value.trim().length <= 500 &&
       address.checkValidity() && province.value && province.checkValidity() &&
       phone.value.trim() && phone.checkValidity());
+    const needsLocalContact = Boolean(provider && provider.value === 'PMV' && province && cartItems.some(function (item) {
+      return item.province === province.value && item.delivery_type !== 'pickup';
+    }));
     button.disabled = !deliveryDetailsReady || !provider || provider.disabled ||
       !shippingPayer || !freightQuoteReady || !paymentMethodReady || !hasAllPayments ||
+      (needsLocalContact && !checkoutLocalContactsReady) ||
       !cartItems.length || cartItems.some(function (item) { return !item.available; });
   }
 
@@ -1270,6 +1277,7 @@
   }
 
   async function loadCart() {
+    const requestId = ++cartLoadRequest;
     const list = document.getElementById('cartItems');
     if (!list) return;
     if (!currentUser) {
@@ -1282,8 +1290,16 @@
       return;
     }
     try {
-      const result = await api('/api/cart');
+      const checkoutProvince = document.getElementById('deliveryProvince');
+      const query = checkoutProvince && checkoutProvince.value
+        ? '?deliveryProvince=' + encodeURIComponent(checkoutProvince.value)
+        : '';
+      const result = await api('/api/cart' + query);
+      if (requestId !== cartLoadRequest) return;
       cartItems = result.items;
+      checkoutLocalContactsReady = !checkoutProvince || !checkoutProvince.value || cartItems.every(function (item) {
+        return item.province !== checkoutProvince.value || item.delivery_type === 'pickup' || Boolean(item.delivery_contact);
+      });
       updateShippingProviderAvailability();
       renderVendorCheckoutMethods();
       list.replaceChildren();
@@ -1291,14 +1307,54 @@
       cartItems.forEach(function (item) {
         const line = document.createElement('div');
         line.className = 'cart-item';
+        line.dataset.productId = String(item.product_id);
         const label = document.createElement('div');
         label.className = 'item-meta';
         const name = document.createElement('strong');
         name.textContent = text(item.product_name);
         const detail = document.createElement('small');
-        detail.textContent = money(item.price_kina) + ' · ' + item.stock_quantity + ' in stock · ' + deliveryTypeLabel(item.delivery_type);
+        const conditionLabels = { new: 'New', used: 'Used', refurbished: 'Refurbished' };
+        detail.textContent = money(item.price_kina) + ' / ' + text(item.price_unit || 'item') + ' · ' + item.stock_quantity + ' in stock · ' +
+          (conditionLabels[item.item_condition] || text(item.item_condition)) + ' · ' + deliveryTypeLabel(item.delivery_type);
         if (!item.available) detail.textContent += ' · Unavailable; remove before checkout';
         label.append(name, detail);
+        if (document.getElementById('placeOrderButton')) {
+          const fulfillment = document.createElement('dl');
+          fulfillment.className = 'checkout-item-fulfillment';
+          const entries = [
+            ['Condition', conditionLabels[item.item_condition] || text(item.item_condition)],
+            ['Price applies to', item.price_unit || 'item'],
+            ['Seller province', provinceLabel(item.province)],
+            ['Delivery or pickup', deliveryTypeLabel(item.delivery_type)]
+          ];
+          const detailLabels = {
+            brand: 'Brand or manufacturer',
+            model: 'Model or SKU',
+            dimensions: 'Size, dimensions, or weight',
+            materials: 'Materials or ingredients',
+            origin: 'Country or province of origin',
+            warranty: 'Warranty and returns',
+            deliveryAreas: 'Areas or provinces served',
+            dispatchTime: 'Preparation or dispatch time',
+            deliveryEstimate: 'Estimated delivery time',
+            pickupDetails: 'Pickup location and arrangements',
+            deliveryRestrictions: 'Delivery restrictions'
+          };
+          Object.keys(detailLabels).forEach(function (field) {
+            const value = item.additional_details && item.additional_details[field];
+            if (value) entries.push([detailLabels[field], value]);
+          });
+          if (item.delivery_notes) entries.push(['Delivery or pickup notes', item.delivery_notes]);
+          entries.forEach(function (entry) {
+            const term = document.createElement('dt');
+            term.textContent = entry[0];
+            const description = document.createElement('dd');
+            description.textContent = text(entry[1]);
+            fulfillment.append(term, description);
+          });
+          appendCheckoutLocalContact(fulfillment, item);
+          label.appendChild(fulfillment);
+        }
         const quantity = document.createElement('input');
         quantity.type = 'number';
         quantity.min = '1';
@@ -1346,11 +1402,71 @@
       await refreshFreightEstimate();
       await refreshCartCount();
     } catch (error) {
+      if (requestId !== cartLoadRequest) return;
       list.textContent = error.message;
       const checkoutButton = document.getElementById('placeOrderButton');
       if (checkoutButton) checkoutButton.disabled = true;
       const cartCheckoutLink = document.getElementById('cartCheckoutLink');
       if (cartCheckoutLink) cartCheckoutLink.setAttribute('aria-disabled', 'true');
+    }
+  }
+
+  function appendCheckoutLocalContact(fulfillment, item) {
+    const contact = item.delivery_contact;
+    if (!contact || item.delivery_type === 'pickup') return;
+    [
+      ['Driver or skipper', contact.name],
+      ['Phone or WhatsApp', contact.phone],
+      ['Vehicle, boat, or transport provider', contact.transport],
+      ['Route and pickup/drop-off point', contact.route]
+    ].forEach(function (entry) {
+      if (!entry[1]) return;
+      const term = document.createElement('dt');
+      term.className = 'checkout-item-local-contact';
+      term.textContent = entry[0];
+      const description = document.createElement('dd');
+      description.className = 'checkout-item-local-contact';
+      description.textContent = text(entry[1]);
+      fulfillment.append(term, description);
+    });
+  }
+
+  async function refreshCheckoutLocalContacts() {
+    const list = document.getElementById('cartItems');
+    const province = document.getElementById('deliveryProvince');
+    if (!list || !province || !province.value) return;
+    const requestId = ++checkoutContactRequest;
+    const destination = province.value;
+    const hasDestinationDelivery = cartItems.some(function (item) {
+      return item.province === destination && item.delivery_type !== 'pickup';
+    });
+    checkoutLocalContactsReady = !hasDestinationDelivery;
+    list.querySelectorAll('.checkout-item-local-contact').forEach(function (row) { row.remove(); });
+    updateCheckoutAvailability();
+    try {
+      const result = await api('/api/cart?deliveryProvince=' + encodeURIComponent(destination));
+      if (requestId !== checkoutContactRequest || province.value !== destination) return;
+      const items = new Map(result.items.map(function (item) { return [String(item.product_id), item]; }));
+      let missingLocalContact = false;
+      list.querySelectorAll('.cart-item').forEach(function (line) {
+        const item = items.get(line.dataset.productId);
+        if (!item) return;
+        const cartItem = cartItems.find(function (entry) { return String(entry.product_id) === line.dataset.productId; });
+        if (cartItem) cartItem.delivery_contact = item.delivery_contact;
+        if (item.province === destination && item.delivery_type !== 'pickup' && !item.delivery_contact) {
+          missingLocalContact = true;
+        }
+        const fulfillment = line.querySelector('.checkout-item-fulfillment');
+        if (fulfillment) appendCheckoutLocalContact(fulfillment, item);
+      });
+      checkoutLocalContactsReady = !missingLocalContact;
+      updateCheckoutAvailability();
+    } catch (error) {
+      if (requestId !== checkoutContactRequest) return;
+      checkoutLocalContactsReady = !hasDestinationDelivery;
+      updateCheckoutAvailability();
+      const status = document.getElementById('freightQuoteStatus');
+      if (hasDestinationDelivery && status) status.textContent = 'Could not load the local driver/skipper contact. Retry checkout before placing your order.';
     }
   }
 
@@ -2779,6 +2895,7 @@
       if (deliveryProvince.value) saveDeliveryProvince(deliveryProvince.value);
       updateShippingProviderAvailability();
       updateCheckoutAvailability();
+      refreshCheckoutLocalContacts();
       refreshFreightEstimate();
     });
     document.querySelectorAll('input[name="carrierMethod"]').forEach(function (input) {

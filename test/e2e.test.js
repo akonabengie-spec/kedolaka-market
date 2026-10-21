@@ -608,8 +608,37 @@ test('Marketplace navigation, product discovery, filters, details, redirects, an
     await page.waitForURL('**/checkout.html');
     const placeOrder = page.locator('#placeOrderButton');
     await placeOrder.waitFor({ state: 'visible' });
+    const checkoutItem = page.locator('#cartItems .cart-item').filter({ hasText: productName });
+    await checkoutItem.waitFor();
+    assert.match(await checkoutItem.innerText(), /Condition[\s\S]*New/);
+    assert.match(await checkoutItem.innerText(), /Price applies to[\s\S]*item/);
+    assert.match(await checkoutItem.innerText(), /Areas or provinces served[\s\S]*Madang and surrounding districts/);
+    assert.match(await checkoutItem.innerText(), /Preparation or dispatch time[\s\S]*Within 2 days/);
+    assert.match(await checkoutItem.innerText(), /Estimated delivery time[\s\S]*2 to 4 days/);
+    assert.match(await checkoutItem.innerText(), /Pickup location and arrangements[\s\S]*Pickup in town by arrangement/);
+    assert.match(await checkoutItem.innerText(), /Delivery restrictions[\s\S]*No restrictions/);
+    assert.match(await checkoutItem.innerText(), /Delivery or pickup notes[\s\S]*Keep the item dry/);
+    assert.doesNotMatch(await checkoutItem.innerText(), /Browser Test Driver|\+675\d{8}/,
+      'Local driver contact details are not shown for an inter-province destination.');
+    const selectedPaymentBeforeProvinceChange = await page.locator('#paymentMethods input[type="radio"]:checked').first().inputValue();
     assert.equal(await placeOrder.isDisabled(), true, 'Checkout remains blocked until all delivery details and a configured route are set.');
     assert.equal(await page.locator('#deliveryProvince').inputValue(), 'Madang', 'The saved Deliver to province preselects the checkout destination.');
+    await page.locator('#deliveryProvince').selectOption('NCD');
+    await page.waitForFunction(function () {
+      const item = document.querySelector('#cartItems .cart-item');
+      return item && item.textContent.includes('Browser Test Driver');
+    });
+    assert.match(await checkoutItem.innerText(), /Driver or skipper[\s\S]*Browser Test Driver/);
+    assert.match(await checkoutItem.innerText(), /Phone or WhatsApp[\s\S]*\+675/);
+    assert.match(await checkoutItem.innerText(), /Vehicle, boat, or transport provider[\s\S]*Test PMV/);
+    assert.match(await checkoutItem.innerText(), /Route and pickup\/drop-off point[\s\S]*NCD to/);
+    assert.equal(await page.locator('#paymentMethods input[type="radio"]:checked').first().inputValue(), selectedPaymentBeforeProvinceChange,
+      'Changing delivery province preserves the selected payment method.');
+    await page.locator('#deliveryProvince').selectOption('Madang');
+    await page.waitForFunction(function () {
+      const item = document.querySelector('#cartItems .cart-item');
+      return item && !item.textContent.includes('Browser Test Driver');
+    });
     assert.match(await page.locator('.section-block').first().innerText(), /shared with the seller/i);
     assert.equal(await page.locator('input[name="carrierMethod"][value="Pickup"]').isDisabled(), true);
     assert.equal(await page.locator('input[name="carrierMethod"][value="PMV"]').isDisabled(), true);

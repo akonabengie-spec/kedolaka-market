@@ -22,15 +22,16 @@ const PORT = Number(process.env.PORT || 3000);
 const JWT_SECRET = process.env.JWT_SECRET;
 const root = path.resolve(__dirname, '..');
 const uploadsRoot = path.resolve(process.env.UPLOADS_DIR || path.join(root, 'uploads'));
+const MAX_PRODUCT_IMAGE_SIZE_BYTES = 4 * 1024 * 1024;
 const productImageUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024, files: 1 }
+  limits: { fileSize: MAX_PRODUCT_IMAGE_SIZE_BYTES, files: 1 }
 });
 function parseProductImageUpload(req, res, next) {
   productImageUpload.single('productImage')(req, res, function (error) {
     if (error instanceof multer.MulterError) {
       const message = error.code === 'LIMIT_FILE_SIZE'
-        ? 'Product images must be 5 MB or smaller.'
+        ? 'Product images must be 4 MB or smaller.'
         : 'Only one product image can be uploaded at a time.';
       return res.status(400).json(errorResponse(400, 'invalid_image_upload', message));
     }
@@ -1030,9 +1031,20 @@ app.delete('/api/vendor/products/:productId', authenticateToken, requireRole('ve
 });
 
 app.get('/api/cart', authenticateToken, async function (req, res, next) {
+  const deliveryProvince = req.query.deliveryProvince === undefined
+    ? null
+    : normalizeProvince(req.query.deliveryProvince);
+  if (req.query.deliveryProvince !== undefined && !deliveryProvince) {
+    return res.status(400).json(errorResponse(400, 'invalid_delivery_province', 'Select a valid delivery province.'));
+  }
   try {
     const result = await query(
-      `SELECT c.product_id, c.quantity, p.product_name, p.price_kina, ${availableStockSql('p')} AS stock_quantity, p.image_url, p.province, p.delivery_type,
+          `SELECT c.product_id, c.quantity, p.product_name, p.price_kina, ${availableStockSql('p')} AS stock_quantity, p.image_url, p.province, p.delivery_type,
+              p.item_condition, p.price_unit, p.delivery_notes, p.additional_details,
+              CASE WHEN p.province = $2 AND p.delivery_type <> 'pickup' THEN (
+                SELECT contact.value FROM jsonb_array_elements(p.delivery_contacts) AS contact(value)
+                 WHERE contact.value->>'province' = p.province LIMIT 1
+              ) ELSE NULL END AS delivery_contact,
               EXISTS (
                 SELECT 1 FROM jsonb_array_elements(p.delivery_contacts) AS contact
                  WHERE contact->>'province' = p.province
@@ -1042,7 +1054,7 @@ app.get('/api/cart', authenticateToken, async function (req, res, next) {
               (p.status = 'listed' AND ${availableStockSql('p')} > 0 AND v.status = 'active' AND c.quantity <= ${availableStockSql('p')}) AS available
          FROM cart_items c JOIN products p ON p.product_id = c.product_id
          JOIN vendors v ON v.vendor_id = p.vendor_id
-        WHERE c.user_id = $1 ORDER BY c.created_at`, [req.user.user_id]
+        WHERE c.user_id = $1 ORDER BY c.created_at`, [req.user.user_id, deliveryProvince]
     );
     return res.status(200).json(successResponse(200, 'Cart.', { items: result.rows }));
   } catch (error) {

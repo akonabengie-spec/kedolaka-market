@@ -10,6 +10,8 @@ test('public page aliases, assets, and unauthenticated API guards are reachable'
   await new Promise(function (resolve) { server.once('listening', resolve); });
   const baseUrl = `http://127.0.0.1:${server.address().port}`;
   const root = path.join(__dirname, '..');
+  const vercelConfig = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
+  assert.ok(vercelConfig.builds[0].config.includeFiles.includes('uploads/**'), 'Vercel packages existing product images');
   const htmlFiles = fs.readdirSync(root).filter(function (file) {
     return file.endsWith('.html') && file !== 'offline.html';
   });
@@ -138,6 +140,9 @@ test('public page aliases, assets, and unauthenticated API guards are reachable'
       '/assets/kedolaka-market-logo-light.svg',
       '/site.webmanifest',
       '/sw.js',
+      ...fs.readdirSync(path.join(root, 'uploads', 'products')).map(function (file) {
+        return `/uploads/products/${file}`;
+      }),
       '/js/pages/support-contact.js',
       ...linkedAssets
     ])) {

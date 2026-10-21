@@ -281,9 +281,19 @@
         background: linear-gradient(135deg, #fff7eb, #f2ead8);
         font-size: 2rem;
       }
-      .item-meta { flex: 1; }
+      .item-meta { flex: 1; min-width: 0; }
       .item-meta strong { display: block; }
       .item-meta small { color: var(--muted); }
+      .checkout-item-fulfillment {
+        display: grid;
+        grid-template-columns: minmax(105px, 0.42fr) minmax(0, 1fr);
+        gap: 4px 10px;
+        margin: 9px 0 0;
+        font-size: 0.78rem;
+        line-height: 1.4;
+      }
+      .checkout-item-fulfillment dt { color: var(--muted); }
+      .checkout-item-fulfillment dd { margin: 0; overflow-wrap: anywhere; }
       .line-total { font-weight: 700; }
       .totals {
         margin-top: 18px;
