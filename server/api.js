@@ -13,6 +13,7 @@ const cloudinary = require('cloudinary').v2;
 const nodemailer = require('nodemailer');
 const path = require('node:path');
 const { pool, query, checkDatabase, checkSchema } = require('./db');
+const { uploadToSupabaseStorage } = require('./supabase-storage');
 const { getPaymentConfiguration, validatePaymentConfiguration } = require('./payments');
 const { authenticateToken, optionalAuthenticateToken, requireRole } = require('./security');
 
@@ -36,7 +37,10 @@ function parseProductImageUpload(req, res, next) {
     return error ? next(error) : next();
   });
 }
-function uploadImageToCloudinary(buffer) {
+async function uploadProductImage(buffer, imageFormat) {
+  const supabaseUrl = await uploadToSupabaseStorage(buffer, imageFormat);
+  if (supabaseUrl) return supabaseUrl;
+
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
   if (!cloudName || !uploadPreset) {
@@ -806,11 +810,12 @@ app.get('/api/vendor/dashboard', authenticateToken, requireRole('vendor'), async
 
 app.post('/api/uploads', authenticateToken, requireRole('vendor'), requireActiveVendor, parseProductImageUpload, async function (req, res, next) {
   if (!req.file) return res.status(400).json(errorResponse(400, 'missing_image', 'Select an image to upload.'));
-  if (!getProductImageFormat(req.file.buffer)) {
+  const imageFormat = getProductImageFormat(req.file.buffer);
+  if (!imageFormat) {
     return res.status(400).json(errorResponse(400, 'invalid_product_image', 'Upload a valid JPEG, PNG, or WebP image.'));
   }
   try {
-    const secureUrl = await uploadImageToCloudinary(req.file.buffer);
+    const secureUrl = await uploadProductImage(req.file.buffer, imageFormat);
     return res.status(201).json({ secure_url: secureUrl });
   } catch (error) {
     return next(error);
@@ -855,7 +860,7 @@ app.post('/api/vendor/products', authenticateToken, requireRole('vendor'), requi
     return res.status(400).json(errorResponse(400, 'invalid_product', 'Provide valid product details and a local driver/skipper contact for delivery listings. Pickup-only listings do not need a local contact.'));
   }
   try {
-    if (req.file) imageUrl = await uploadImageToCloudinary(req.file.buffer);
+    if (req.file) imageUrl = await uploadProductImage(req.file.buffer, imageFormat);
     const result = await query(
       `INSERT INTO products (vendor_id, product_name, description, category, province, delivery_type, item_condition, price_unit, delivery_notes, additional_details, delivery_contacts, price_kina, stock_quantity, image_url, status)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12, $13, NULLIF($14, ''), $15)
@@ -927,7 +932,7 @@ app.patch('/api/vendor/products/:productId', authenticateToken, requireRole('ven
   if (!fields.length) return res.status(400).json(errorResponse(400, 'empty_update', 'Provide at least one field to update.'));
   if (req.file) {
     try {
-      values[imageUrlValueIndex] = await uploadImageToCloudinary(req.file.buffer);
+      values[imageUrlValueIndex] = await uploadProductImage(req.file.buffer, imageFormat);
     } catch (error) {
       return next(error);
     }
@@ -2776,13 +2781,13 @@ if (require.main === module) {
 function getProductImageFormat(buffer) {
   if (!Buffer.isBuffer(buffer)) return null;
   if (buffer.length >= 24 && buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) {
-    return { extension: '.png' };
+    return { extension: '.png', contentType: 'image/png' };
   }
   if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
-    return { extension: '.jpg' };
+    return { extension: '.jpg', contentType: 'image/jpeg' };
   }
   if (buffer.length >= 12 && buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP') {
-    return { extension: '.webp' };
+    return { extension: '.webp', contentType: 'image/webp' };
   }
   return null;
 }

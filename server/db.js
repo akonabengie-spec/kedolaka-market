@@ -1,4 +1,10 @@
 const { Pool } = require('pg');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const sslCaPath = process.env.PGSSL_CA_CERT_PATH
+  ? path.resolve(process.env.PGSSL_CA_CERT_PATH)
+  : null;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -6,7 +12,10 @@ const pool = new Pool({
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
   ssl: process.env.PGSSLMODE === 'require'
-    ? { rejectUnauthorized: process.env.PGSSL_REJECT_UNAUTHORIZED !== 'false' }
+    ? {
+      rejectUnauthorized: process.env.PGSSL_REJECT_UNAUTHORIZED !== 'false',
+      ...(sslCaPath ? { ca: fs.readFileSync(sslCaPath, 'utf8') } : {})
+    }
     : undefined
 });
 
