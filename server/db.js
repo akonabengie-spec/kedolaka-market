@@ -5,6 +5,7 @@ const path = require('node:path');
 const sslCaPath = process.env.PGSSL_CA_CERT_PATH
   ? path.resolve(process.env.PGSSL_CA_CERT_PATH)
   : null;
+const sslCa = process.env.PGSSL_CA_CERT || (sslCaPath ? fs.readFileSync(sslCaPath, 'utf8') : null);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -14,7 +15,7 @@ const pool = new Pool({
   ssl: process.env.PGSSLMODE === 'require'
     ? {
       rejectUnauthorized: process.env.PGSSL_REJECT_UNAUTHORIZED !== 'false',
-      ...(sslCaPath ? { ca: fs.readFileSync(sslCaPath, 'utf8') } : {})
+      ...(sslCa ? { ca: sslCa } : {})
     }
     : undefined
 });
