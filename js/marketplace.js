@@ -15,7 +15,9 @@
   let installPromptEvent = null;
   let installButton = null;
   const deliveryProvinceStorageKey = 'kedolaka-delivery-province';
+  const colorThemeStorageKey = 'kedolaka-color-theme';
   const catalogLimit = 20;
+  let currentColorTheme = 'light';
   const pngProvinces = [
     'NCD', 'Morobe', 'Western Highlands', 'East New Britain', 'Eastern Highlands', 'Madang',
     'Milne Bay', 'East Sepik', 'West Sepik', 'Bougainville', 'Manus', 'New Ireland',
@@ -28,6 +30,19 @@
     { id: 'cash_on_delivery', label: 'Cash on delivery' },
     { id: 'in_person', label: 'Pay in person' }
   ];
+
+  try {
+    const savedTheme = window.localStorage.getItem(colorThemeStorageKey);
+    currentColorTheme = savedTheme === 'dark' || savedTheme === 'light'
+      ? savedTheme
+      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  } catch (error) {
+    console.error('Could not load the saved color theme:', error);
+    currentColorTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  document.documentElement.dataset.theme = currentColorTheme;
+  const browserThemeColor = document.querySelector('meta[name="theme-color"]');
+  if (browserThemeColor) browserThemeColor.content = currentColorTheme === 'dark' ? '#111827' : '#123f35';
 
   window.addEventListener('beforeinstallprompt', function (event) {
     event.preventDefault();
@@ -601,9 +616,7 @@
           summary.textContent = 'Settings';
           const panel = document.createElement('div');
           panel.className = 'settings-navigation-panel';
-          const settingsDefinitions = role === 'vendor'
-            ? [['Help', '/help.html']]
-            : [['Account', '/account.html'], ['Help', '/help.html']];
+          const settingsDefinitions = [['Account', '/account.html'], ['Help', '/help.html']];
           settingsDefinitions.forEach(function (settingDefinition) {
             const settingLink = document.createElement('a');
             settingLink.href = settingDefinition[1];
@@ -614,6 +627,16 @@
             panel.appendChild(settingLink);
           });
           settingsMenu.append(summary, panel);
+          const mobileNavigationQuery = window.matchMedia('(max-width: 760px)');
+          settingsMenu.open = !mobileNavigationQuery.matches;
+          const syncSettingsMenu = function (event) {
+            settingsMenu.open = !event.matches;
+          };
+          if (mobileNavigationQuery.addEventListener) {
+            mobileNavigationQuery.addEventListener('change', syncSettingsMenu);
+          } else {
+            mobileNavigationQuery.addListener(syncSettingsMenu);
+          }
           links.appendChild(settingsMenu);
           return;
         }
@@ -648,6 +671,24 @@
         links.appendChild(categoryMenu);
         loadNavigationCategories(categoryMenu);
       }
+      const themeToggle = document.createElement('button');
+      themeToggle.className = 'theme-toggle';
+      themeToggle.type = 'button';
+      themeToggle.textContent = currentColorTheme === 'dark' ? 'Light mode' : 'Dark mode';
+      themeToggle.setAttribute('aria-pressed', String(currentColorTheme === 'dark'));
+      themeToggle.addEventListener('click', function () {
+        currentColorTheme = currentColorTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = currentColorTheme;
+        if (browserThemeColor) browserThemeColor.content = currentColorTheme === 'dark' ? '#111827' : '#123f35';
+        themeToggle.textContent = currentColorTheme === 'dark' ? 'Light mode' : 'Dark mode';
+        themeToggle.setAttribute('aria-pressed', String(currentColorTheme === 'dark'));
+        try {
+          window.localStorage.setItem(colorThemeStorageKey, currentColorTheme);
+        } catch (error) {
+          console.error('Could not save the color theme preference:', error);
+        }
+      });
+      links.appendChild(themeToggle);
       shell.appendChild(links);
     }
 
