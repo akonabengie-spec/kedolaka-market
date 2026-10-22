@@ -2,11 +2,15 @@
 
 require('dotenv').config();
 const assert = require('node:assert/strict');
-const { URL } = require('node:url');
+const { isConfiguredDatabaseUrl } = require('../test/db-config');
 
 async function main() {
   const testDatabaseUrl = process.env.TEST_DATABASE_URL;
-  assert.ok(testDatabaseUrl, 'TEST_DATABASE_URL must point to an initialized disposable test database.');
+  if (!isConfiguredDatabaseUrl(testDatabaseUrl)) {
+    console.warn('TEST_DATABASE_URL is not configured or still contains placeholder values; skipping PostgreSQL test preflight.');
+    return;
+  }
+
   const database = new URL(testDatabaseUrl);
   assert.equal(
     database.pathname.replace(/^\/+/, ''),

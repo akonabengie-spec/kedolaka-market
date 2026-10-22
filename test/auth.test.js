@@ -1,10 +1,11 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
+const { isConfiguredDatabaseUrl } = require('./db-config');
 require('dotenv').config();
 
 test('registration, login, account retrieval, and logout use persistent revocable sessions', {
-  skip: !process.env.TEST_DATABASE_URL && 'Set TEST_DATABASE_URL to an initialized disposable PostgreSQL database.'
+  skip: !isConfiguredDatabaseUrl(process.env.TEST_DATABASE_URL) && 'Set TEST_DATABASE_URL to an initialized disposable PostgreSQL database.'
 }, async function () {
   process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
   process.env.JWT_SECRET = 'integration-test-secret-only-not-for-production-675';

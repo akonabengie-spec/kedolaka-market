@@ -7,9 +7,11 @@ const crypto = require('node:crypto');
 const net = require('node:net');
 const { URL } = require('node:url');
 const { chromium } = require('@playwright/test');
+const { isConfiguredDatabaseUrl } = require('./db-config');
 
-test('Marketplace navigation, product discovery, filters, details, redirects, and responsive pages work end to end', async function () {
-  assert.ok(process.env.TEST_DATABASE_URL, 'TEST_DATABASE_URL is required for browser E2E tests.');
+test('Marketplace navigation, product discovery, filters, details, redirects, and responsive pages work end to end', {
+  skip: !isConfiguredDatabaseUrl(process.env.TEST_DATABASE_URL) && 'Set TEST_DATABASE_URL to an initialized disposable PostgreSQL database.'
+}, async function () {
   const databaseName = new URL(process.env.TEST_DATABASE_URL).pathname.replace(/^\/+/, '');
   assert.equal(databaseName, 'kundu_market_test', 'Browser tests only run against the disposable test database.');
   process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;

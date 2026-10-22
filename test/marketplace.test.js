@@ -4,6 +4,7 @@ const crypto = require('node:crypto');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const bcrypt = require('bcryptjs');
+const { isConfiguredDatabaseUrl } = require('./db-config');
 require('dotenv').config();
 
 test('payment configuration stays disabled by default and rejects incomplete production settings', async function () {
@@ -27,7 +28,7 @@ test('payment configuration stays disabled by default and rejects incomplete pro
 });
 
 test('database marketplace flow covers catalog, vendor approval, freight, checkout, and admin audit', {
-  skip: !process.env.TEST_DATABASE_URL && 'Set TEST_DATABASE_URL to an initialized disposable PostgreSQL database.'
+  skip: !isConfiguredDatabaseUrl(process.env.TEST_DATABASE_URL) && 'Set TEST_DATABASE_URL to an initialized disposable PostgreSQL database.'
 }, async function () {
   const databaseUrl = process.env.TEST_DATABASE_URL;
   const databaseName = new URL(databaseUrl).pathname.replace(/^\/+/, '');
