@@ -583,18 +583,40 @@
             ['Orders', '/vendor-orders.html'],
             ['Application', '/vendor-application.html'],
             ['Marketplace', '/products'],
-            ['Help', '/help.html']
+            ['Settings', null]
           ]
           : [
             ['Home', '/'],
             ['Shop', '/products'],
             ['Cart', '/cart.html'],
             ['My orders', '/orders.html'],
-            ['Account', '/account.html'],
-            ['Help', '/help.html'],
+            ['Settings', null],
             ['Sell', '/register.html?role=vendor']
           ];
       definitions.forEach(function (definition) {
+        if (definition[0] === 'Settings') {
+          const settingsMenu = document.createElement('details');
+          settingsMenu.className = 'settings-navigation';
+          const summary = document.createElement('summary');
+          summary.textContent = 'Settings';
+          const panel = document.createElement('div');
+          panel.className = 'settings-navigation-panel';
+          const settingsDefinitions = role === 'vendor'
+            ? [['Help', '/help.html']]
+            : [['Account', '/account.html'], ['Help', '/help.html']];
+          settingsDefinitions.forEach(function (settingDefinition) {
+            const settingLink = document.createElement('a');
+            settingLink.href = settingDefinition[1];
+            settingLink.textContent = settingDefinition[0];
+            if (pagePath === new URL(settingDefinition[1], window.location.origin).pathname) {
+              settingLink.setAttribute('aria-current', 'page');
+            }
+            panel.appendChild(settingLink);
+          });
+          settingsMenu.append(summary, panel);
+          links.appendChild(settingsMenu);
+          return;
+        }
         const link = document.createElement('a');
         link.href = definition[1];
         link.textContent = definition[0];

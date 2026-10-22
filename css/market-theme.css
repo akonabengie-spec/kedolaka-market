@@ -1691,23 +1691,51 @@ main nav.breadcrumb-nav a:hover {
   text-decoration: none;
 }
 
+.settings-navigation {
+  position: relative;
+}
+
+.settings-navigation > summary {
+  display: none;
+}
+
+.settings-navigation-panel {
+  display: contents;
+}
+
+.main-nav .settings-navigation-panel > a {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 7px;
+  color: inherit;
+  text-decoration: none;
+}
+
 .main-nav .nav-links > a:hover,
 .main-nav .nav-links > a[aria-current="page"],
-.main-nav .category-navigation[open] > summary {
+.main-nav .category-navigation[open] > summary,
+.main-nav .settings-navigation-panel > a:hover,
+.main-nav .settings-navigation-panel > a[aria-current="page"] {
   background: rgba(36, 87, 166, 0.1);
   color: #173e7a;
 }
 
 body > header .main-nav .nav-links > a:hover,
 body > header .main-nav .nav-links > a[aria-current="page"],
-body > header .main-nav .category-navigation[open] > summary {
+body > header .main-nav .category-navigation[open] > summary,
+body > header .main-nav .settings-navigation-panel > a:hover,
+body > header .main-nav .settings-navigation-panel > a[aria-current="page"] {
   background: #edf4fd;
   color: #2457a6;
 }
 
 body > nav.main-nav .nav-links > a:hover,
 body > nav.main-nav .nav-links > a[aria-current="page"],
-body > nav.main-nav .category-navigation[open] > summary {
+body > nav.main-nav .category-navigation[open] > summary,
+body > nav.main-nav .settings-navigation-panel > a:hover,
+body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
   background: #eaf1fb;
   color: #173e7a;
 }
@@ -1814,6 +1842,116 @@ body > nav.main-nav .category-navigation[open] > summary {
 }
 
 @media (max-width: 760px) {
+  body > header .main-nav .nav-links,
+  body > nav.main-nav .nav-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+    gap: 6px;
+    width: 100%;
+  }
+
+  body > header .main-nav .nav-links > a,
+  body > nav.main-nav .nav-links > a,
+  body > header .settings-navigation > summary,
+  body > nav.main-nav .settings-navigation > summary {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: 1px solid #dce5f2;
+    border-radius: 9px;
+    background: #fff;
+    color: #2457a6;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  body > nav.main-nav .nav-links > a,
+  body > nav.main-nav .settings-navigation > summary {
+    border-color: rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
+  body > header .settings-navigation,
+  body > nav.main-nav .settings-navigation {
+    position: relative;
+    min-width: 0;
+  }
+
+  body > header .settings-navigation > summary,
+  body > nav.main-nav .settings-navigation > summary {
+    display: flex;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .settings-navigation > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .settings-navigation > summary::after {
+    width: 0.45em;
+    height: 0.45em;
+    margin: -0.2em 0 0 8px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    content: "";
+    transform: rotate(45deg);
+  }
+
+  .settings-navigation[open] > summary::after {
+    margin-top: 0.2em;
+    transform: rotate(225deg);
+  }
+
+  body > header .settings-navigation-panel,
+  body > nav.main-nav .settings-navigation-panel {
+    position: absolute;
+    z-index: 60;
+    top: calc(100% + 6px);
+    right: 0;
+    display: none;
+    width: min(220px, calc(100vw - 32px));
+    gap: 4px;
+    padding: 8px;
+    border: 1px solid #dce5f2;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(26, 46, 76, 0.16);
+  }
+
+  body > header .settings-navigation[open] .settings-navigation-panel,
+  body > nav.main-nav .settings-navigation[open] .settings-navigation-panel {
+    display: grid;
+  }
+
+  body > header .settings-navigation-panel > a,
+  body > nav.main-nav .settings-navigation-panel > a {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    padding: 9px 12px;
+    border-radius: 7px;
+    color: #2457a6;
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  body > header .settings-navigation-panel > a:hover,
+  body > header .settings-navigation-panel > a[aria-current="page"],
+  body > nav.main-nav .settings-navigation-panel > a:hover,
+  body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
+    background: #edf4fd;
+    color: #173e7a;
+  }
+
+  body > footer .global-footer-links a[href="/help.html"] {
+    display: none;
+  }
+
   .cart-layout {
     grid-template-columns: minmax(0, 1fr);
   }
