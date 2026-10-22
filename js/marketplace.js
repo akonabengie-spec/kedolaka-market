@@ -1025,7 +1025,8 @@
     if (maximumPrice && query.has('maxPrice')) maximumPrice.value = query.get('maxPrice');
     if (provinceSelect && currentUser) provinceSelect.value = currentUser.homeProvince;
     if (search && search.value.trim()) params.set('q', search.value.trim());
-    if (category && category.value && category.value !== 'all') params.set('category', category.value);
+    const selectedCategory = category && query.has('category') ? query.get('category') : category && category.value;
+    if (selectedCategory && selectedCategory !== 'all') params.set('category', selectedCategory);
     if (province && province.value && province.value !== 'all') params.set('province', province.value);
     if (sort && sort.value) params.set('sort', sort.value);
     if (minimumPrice && minimumPrice.value) params.set('minPrice', minimumPrice.value);
@@ -1085,7 +1086,8 @@
     if (!select && !featured) return;
     try {
       const result = await api('/api/products/categories');
-      const selected = select ? select.value : '';
+      const query = new URLSearchParams(window.location.search);
+      const selected = select ? (query.get('category') || select.value) : '';
       if (select) {
         select.replaceChildren(new Option('All Categories', 'all'));
         result.categories.forEach(function (category) {
@@ -1360,6 +1362,7 @@
       const result = await api('/api/cart' + query);
       if (requestId !== cartLoadRequest) return;
       cartItems = result.items;
+      updateCartBadge(cartItems.reduce(function (sum, item) { return sum + Number(item.quantity); }, 0));
       checkoutLocalContactsReady = !checkoutProvince || !checkoutProvince.value || cartItems.every(function (item) {
         return item.province !== checkoutProvince.value || item.delivery_type === 'pickup' || Boolean(item.delivery_contact);
       });
@@ -1463,7 +1466,6 @@
       }
       if (checkoutButton) updateCheckoutAvailability();
       await refreshFreightEstimate();
-      await refreshCartCount();
     } catch (error) {
       if (requestId !== cartLoadRequest) return;
       list.textContent = error.message;
@@ -2888,21 +2890,7 @@
       });
     }
     bindAuthForms();
-    await loadSession();
-    setupSharedNavigation();
-    guardPageAccess();
-    await refreshCartCount();
-    await loadCategories();
-    await loadProducts();
-    await loadCart();
-    await loadOrderHistory();
-    bindCheckout();
-    await loadProductDetail();
-    await loadOrderDetail();
-    await loadPaymentStatus();
-    await initAccountProfile();
-    await initVendorWorkspace();
-    await initAdminWorkspace();
+    const sessionPromise = loadSession();
     const search = document.getElementById('keywordSearch');
     const category = document.getElementById('categoryFilter');
     const homeSearchSubmit = document.getElementById('homeSearchSubmit');
@@ -2963,6 +2951,24 @@
     });
     document.querySelectorAll('input[name="carrierMethod"]').forEach(function (input) {
       input.addEventListener('change', refreshFreightEstimate);
+    });
+    await sessionPromise;
+    setupSharedNavigation();
+    guardPageAccess();
+    bindCheckout();
+    Promise.all([
+      document.getElementById('cartItems') ? loadCart() : refreshCartCount(),
+      loadCategories(),
+      loadProducts(),
+      loadOrderHistory(),
+      loadProductDetail(),
+      loadOrderDetail(),
+      loadPaymentStatus(),
+      initAccountProfile(),
+      initVendorWorkspace(),
+      initAdminWorkspace()
+    ]).catch(function (error) {
+      console.error('Could not initialize marketplace page:', error);
     });
   });
 })();

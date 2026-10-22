@@ -1858,7 +1858,7 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
   body > header .main-nav .nav-links,
   body > nav.main-nav .nav-links {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
     width: 100%;
   }
@@ -1881,6 +1881,12 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
     font-size: 0.9rem;
     font-weight: 700;
     text-align: center;
+    white-space: nowrap;
+  }
+
+  body > header .main-nav .nav-links > *,
+  body > nav.main-nav .nav-links > * {
+    min-width: 0;
   }
 
   body > nav.main-nav .nav-links > a,
@@ -1889,6 +1895,45 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
     border-color: rgba(255, 255, 255, 0.24);
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
+  }
+
+  .home-store-page > nav.main-nav .nav-links > a,
+  .home-store-page > nav.main-nav .settings-navigation > summary,
+  .home-store-page > nav.main-nav .theme-toggle,
+  .products-store-page .site-header .nav-links > a,
+  .products-store-page .site-header .settings-navigation > summary,
+  .products-store-page .site-header .theme-toggle {
+    border-color: #dce5f2;
+    background: #fff;
+    color: #2457a6;
+  }
+
+  .home-store-page > nav.main-nav .category-navigation > summary,
+  .products-store-page .site-header .category-navigation > summary {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: 1px solid #dce5f2;
+    border-radius: 9px;
+    background: #fff;
+    color: #2457a6;
+    font-size: 0.9rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .home-store-page > nav.main-nav .nav-links > a:hover,
+  .home-store-page > nav.main-nav .nav-links > a[aria-current="page"],
+  .home-store-page > nav.main-nav .settings-navigation > summary:hover,
+  .home-store-page > nav.main-nav .category-navigation > summary:hover,
+  .home-store-page > nav.main-nav .theme-toggle:hover,
+  .products-store-page .site-header .nav-links > a:hover,
+  .products-store-page .site-header .nav-links > a[aria-current="page"] {
+    border-color: #a8bfdf;
+    background: #edf4fd;
+    color: #173e7a;
   }
 
   body > header .settings-navigation,
@@ -1964,6 +2009,15 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
     color: #173e7a;
   }
 
+  body > nav.main-nav > .nav-button {
+    display: flex;
+    width: fit-content;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    margin: 8px 12px 12px;
+  }
+
   body > footer .global-footer-links a[href="/help.html"] {
     display: none;
   }
@@ -1991,6 +2045,13 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
 
   .main-nav .nav-links {
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  body > header .main-nav .nav-links,
+  body > nav.main-nav .nav-links {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -2318,6 +2379,28 @@ html[data-theme="dark"] body > header .category-navigation[open] > summary,
 html[data-theme="dark"] body > nav.main-nav .category-navigation[open] > summary {
   background: #27364b !important;
   color: #f3f6fb !important;
+}
+
+@media (max-width: 760px) {
+  html[data-theme="dark"] .home-store-page > nav.main-nav .nav-links > a,
+  html[data-theme="dark"] .home-store-page > nav.main-nav .settings-navigation > summary,
+  html[data-theme="dark"] .home-store-page > nav.main-nav .category-navigation > summary,
+  html[data-theme="dark"] .home-store-page > nav.main-nav .theme-toggle,
+  html[data-theme="dark"] .products-store-page .site-header .nav-links > a,
+  html[data-theme="dark"] .products-store-page .site-header .settings-navigation > summary,
+  html[data-theme="dark"] .products-store-page .site-header .category-navigation > summary,
+  html[data-theme="dark"] .products-store-page .site-header .theme-toggle {
+    border-color: #465367 !important;
+    background: #27364b !important;
+    color: #e5e7eb !important;
+  }
+
+  html[data-theme="dark"] body > nav.main-nav > .nav-button,
+  html[data-theme="dark"] .home-store-page > nav.main-nav > .nav-button {
+    border-color: #465367 !important;
+    background: #27364b !important;
+    color: #e5e7eb !important;
+  }
 }
 
 html[data-theme="dark"] body > footer,
