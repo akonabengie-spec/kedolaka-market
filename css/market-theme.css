@@ -2062,3 +2062,43 @@ body > footer .global-footer-links a {
     padding: 12px;
   }
 }
+
+html body {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+@media (max-width: 760px) {
+  body > main,
+  body > main.container,
+  body > header,
+  body > footer {
+    min-width: 0;
+  }
+
+  body > main.container :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  body > main.container :is(button, [type="submit"], a.btn) {
+    min-height: 44px;
+  }
+
+  .section-head,
+  .dashboard-header,
+  .panel-head {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  body > header {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  body > footer {
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+}

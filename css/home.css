@@ -861,7 +861,25 @@
         }
 
         .home-store-header .deliver-box {
-          padding: 7px 9px;
+          display: none;
+        }
+
+        .home-store-header .header-actions {
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+
+        .home-store-header .header-actions :is(.nav-button, .cart-button) {
+          padding-inline: 8px;
+          font-size: 0.9rem;
+        }
+
+        .home-store-header .cart-badge {
+          right: 0;
+        }
+
+        .storefront-hero .hero-copy h1 {
+          font-size: clamp(1.85rem, 8vw, 2.25rem);
         }
 
         .storefront-benefits {

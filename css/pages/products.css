@@ -433,7 +433,7 @@ body > main.container > form#productsFilters {
 
 .market-product-view {
   display: inline-flex;
-  min-height: 39px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   margin-top: 4px;
@@ -513,6 +513,10 @@ body > main.container > form#productsFilters {
 
   .market-product-card h3 {
     font-size: 0.94rem;
+  }
+
+  .market-product-view {
+    width: 100%;
   }
 }
 
