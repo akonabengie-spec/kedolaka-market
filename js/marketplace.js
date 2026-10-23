@@ -781,6 +781,7 @@
     }
     addInstallButton(mainNavigation);
     bindThemeToggle(document.getElementById('profileThemeToggle'));
+    bindThemeToggle(document.getElementById('mobileThemeToggle'));
 
     const header = document.querySelector('body > header');
     if (header && !header.querySelector('.search-shell, .global-market-search, #keywordSearch, form[role="search"]')) {

@@ -1012,4 +1012,98 @@
           grid-column: 2;
           grid-row: 1;
         }
+
+        .home-store-header .header-actions {
+          position: relative;
+        }
+
+        .mobile-settings-menu {
+          position: relative;
+          margin-left: auto;
+        }
+
+        .mobile-settings-menu > summary {
+          display: inline-flex;
+          min-height: 44px;
+          align-items: center;
+          justify-content: center;
+          padding: 8px 14px;
+          border: 1px solid #d5dfed;
+          border-radius: 10px;
+          background: #fff;
+          color: #244a83;
+          cursor: pointer;
+          font-weight: 700;
+          list-style: none;
+        }
+
+        .mobile-settings-menu > summary::-webkit-details-marker {
+          display: none;
+        }
+
+        .mobile-settings-menu > summary::after {
+          width: 0.45em;
+          height: 0.45em;
+          margin: -0.2em 0 0 8px;
+          border-right: 1.5px solid currentColor;
+          border-bottom: 1.5px solid currentColor;
+          content: "";
+          transform: rotate(45deg);
+        }
+
+        .mobile-settings-menu[open] > summary::after {
+          margin-top: 0.2em;
+          transform: rotate(225deg);
+        }
+
+        .mobile-settings-panel {
+          position: absolute;
+          z-index: 60;
+          top: calc(100% + 6px);
+          right: 0;
+          display: none;
+          width: min(260px, calc(100vw - 24px));
+          gap: 4px;
+          padding: 8px;
+          border: 1px solid #dce5f2;
+          border-radius: 10px;
+          background: #fff;
+          box-shadow: 0 8px 24px rgba(26, 46, 76, 0.16);
+        }
+
+        .mobile-settings-menu[open] .mobile-settings-panel {
+          display: grid;
+        }
+
+        .mobile-settings-panel > a,
+        .mobile-settings-panel > button {
+          display: flex;
+          min-height: 44px;
+          align-items: center;
+          padding: 9px 12px;
+          border: 0;
+          border-radius: 7px;
+          background: transparent;
+          color: #2457a6;
+          font-weight: 650;
+          text-align: left;
+          text-decoration: none;
+        }
+
+        .mobile-settings-panel > a:hover,
+        .mobile-settings-panel > button:hover {
+          background: #edf4fd;
+          color: #173e7a;
+        }
+
+        .home-store-page > nav.main-nav .settings-navigation,
+        .home-store-page > nav.main-nav .theme-toggle {
+          display: none;
+        }
+      }
+
+      @media (min-width: 769px) {
+        .mobile-settings-menu {
+          display: none;
+        }
       }
