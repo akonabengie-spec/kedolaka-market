@@ -16,8 +16,10 @@
   let installButton = null;
   const deliveryProvinceStorageKey = 'kedolaka-delivery-province';
   const colorThemeStorageKey = 'kedolaka-color-theme';
+  const offlineReadCachePrefix = 'kedolaka-offline-read:';
   const catalogLimit = 20;
   let currentColorTheme = 'light';
+  let connectivityStatusNode = null;
   const pngProvinces = [
     'NCD', 'Morobe', 'Western Highlands', 'East New Britain', 'Eastern Highlands', 'Madang',
     'Milne Bay', 'East Sepik', 'West Sepik', 'Bougainville', 'Manus', 'New Ireland',
@@ -414,16 +416,107 @@
     return String(value == null ? '' : value);
   }
 
+  function getPublicReadCacheKey(url, method) {
+    if (method !== 'GET') return '';
+    const requestUrl = new URL(url, window.location.origin);
+    if (requestUrl.origin !== window.location.origin ||
+        !/^\/api\/products(?:\/categories|\/[1-9]\d*)?$/.test(requestUrl.pathname)) return '';
+    return offlineReadCachePrefix + requestUrl.pathname + requestUrl.search;
+  }
+
+  function readOfflinePublicData(key) {
+    try {
+      const saved = window.localStorage.getItem(key);
+      if (!saved) return null;
+      const record = JSON.parse(saved);
+      return record && record.payload && typeof record.payload === 'object' &&
+        !Array.isArray(record.payload) ? record.payload : null;
+    } catch (error) {
+      console.warn('Could not read cached public marketplace data:', error);
+      return null;
+    }
+  }
+
+  function saveOfflinePublicData(key, payload) {
+    try {
+      window.localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), payload: payload }));
+      const savedKeys = [];
+      for (let index = 0; index < window.localStorage.length; index += 1) {
+        const savedKey = window.localStorage.key(index);
+        if (savedKey && savedKey.startsWith(offlineReadCachePrefix)) {
+          savedKeys.push({
+            key: savedKey,
+            savedAt: Number(JSON.parse(window.localStorage.getItem(savedKey)).savedAt) || 0
+          });
+        }
+      }
+      savedKeys.sort(function (first, second) { return first.savedAt - second.savedAt; });
+      while (savedKeys.length > 8) {
+        window.localStorage.removeItem(savedKeys.shift().key);
+      }
+    } catch (error) {
+      console.warn('Could not cache public marketplace data for offline viewing:', error);
+    }
+  }
+
+  function showOfflineNotice(message) {
+    if (!connectivityStatusNode) return;
+    connectivityStatusNode.hidden = false;
+    connectivityStatusNode.textContent = message;
+  }
+
+  function setupConnectivityStatus() {
+    connectivityStatusNode = document.createElement('div');
+    connectivityStatusNode.className = 'connectivity-status';
+    connectivityStatusNode.setAttribute('role', 'status');
+    connectivityStatusNode.setAttribute('aria-live', 'polite');
+    connectivityStatusNode.hidden = navigator.onLine;
+    connectivityStatusNode.textContent = 'You are offline. You can view previously loaded marketplace pages and listings; reconnect to send messages or make changes.';
+    document.body.prepend(connectivityStatusNode);
+
+    window.addEventListener('online', function () {
+      connectivityStatusNode.hidden = true;
+    });
+    window.addEventListener('offline', function () {
+      showOfflineNotice('You are offline. You can view previously loaded marketplace pages and listings; reconnect to send messages or make changes.');
+    });
+    document.addEventListener('submit', function (event) {
+      if (navigator.onLine) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      showOfflineNotice('You are offline. Your changes were not sent. Reconnect to continue.');
+    }, true);
+  }
+
   async function api(url, options) {
     const request = options || {};
+    const method = String(request.method || 'GET').toUpperCase();
+    if (method !== 'GET' && !navigator.onLine) {
+      const failure = new Error('You are offline. Reconnect to send this request; no changes were made.');
+      showOfflineNotice(failure.message);
+      throw failure;
+    }
+    const offlineCacheKey = getPublicReadCacheKey(url, method);
     const headers = Object.assign({}, request.headers || {});
     if (request.body && !headers['Content-Type'] && !(request.body instanceof FormData)) {
       headers['Content-Type'] = 'application/json';
     }
-    const response = await fetch(url, Object.assign({}, request, {
-      credentials: 'same-origin',
-      headers: headers
-    }));
+    let response;
+    try {
+      response = await fetch(url, Object.assign({}, request, {
+        credentials: 'same-origin',
+        headers: headers
+      }));
+    } catch (error) {
+      if (offlineCacheKey) {
+        const cachedPayload = readOfflinePublicData(offlineCacheKey);
+        if (cachedPayload) return cachedPayload;
+      }
+      if (method !== 'GET') {
+        showOfflineNotice('Could not connect. Your changes were not sent; reconnect and try again.');
+      }
+      throw error;
+    }
     let payload;
     try {
       payload = await response.json();
@@ -442,6 +535,7 @@
       failure.status = response.status;
       throw failure;
     }
+    if (offlineCacheKey) saveOfflinePublicData(offlineCacheKey, payload);
     return payload;
   }
 
@@ -3176,6 +3270,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', async function () {
+    setupConnectivityStatus();
     setupPwa();
     setupBreadcrumbs();
     const cartCheckoutLink = document.getElementById('cartCheckoutLink');

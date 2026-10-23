@@ -143,7 +143,11 @@ test('Marketplace navigation, product discovery, filters, details, redirects, an
       return requests.flat().some(function (request) { return new URL(request.url).pathname.startsWith('/api/'); });
     });
     assert.equal(cachedApiUrl, false, 'The PWA does not cache account or marketplace API responses.');
+    await pwaPage.reload({ waitUntil: 'networkidle' });
     await pwaPage.context().setOffline(true);
+    await pwaPage.goto(baseUrl + '/', { waitUntil: 'domcontentloaded' });
+    assert.match(await pwaPage.locator('h1').innerText(), /Find something good/);
+    assert.match(await pwaPage.locator('.connectivity-status').innerText(), /read previously loaded marketplace pages/i);
     await pwaPage.goto(baseUrl + '/products', { waitUntil: 'domcontentloaded' });
     assert.match(await pwaPage.locator('h1').innerText(), /You're offline/);
     await pwaPage.context().setOffline(false);

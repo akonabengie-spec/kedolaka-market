@@ -1860,6 +1860,22 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
   display: none;
 }
 
+.connectivity-status {
+  position: sticky;
+  z-index: 100;
+  top: 0;
+  padding: 10px 16px;
+  background: #fff1d6;
+  color: #59400e;
+  font-size: 0.9rem;
+  font-weight: 650;
+  text-align: center;
+}
+
+.connectivity-status[hidden] {
+  display: none;
+}
+
 .account-profile-menu {
   display: none;
 }

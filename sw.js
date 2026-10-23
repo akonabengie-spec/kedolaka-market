@@ -1,8 +1,9 @@
 'use strict';
 
-const CACHE_NAME = 'kedolaka-market-v1';
+const CACHE_NAME = 'kedolaka-market-v2';
 const OFFLINE_PAGE = '/offline.html';
 const PRECACHE_URLS = [
+  '/',
   OFFLINE_PAGE,
   '/site.webmanifest',
   '/css/styles.css',
@@ -41,8 +42,21 @@ self.addEventListener('fetch', function (event) {
 
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(function () {
-        return caches.match(OFFLINE_PAGE);
+      fetch(request).then(function (response) {
+        const contentType = response.headers.get('content-type') || '';
+        if (response.ok && contentType.includes('text/html')) {
+          const pageRequest = new Request(url.origin + url.pathname);
+          const cachePage = caches.open(CACHE_NAME).then(function (cache) {
+            return cache.put(pageRequest, response.clone());
+          }).catch(function (error) {
+            console.error('Could not cache this page for offline viewing:', error);
+          });
+          event.waitUntil(cachePage);
+        }
+        return response;
+      }).catch(async function () {
+        const pageRequest = new Request(url.origin + url.pathname);
+        return (await caches.match(pageRequest)) || caches.match(OFFLINE_PAGE);
       })
     );
     return;
