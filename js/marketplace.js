@@ -640,6 +640,8 @@
     document.body.appendChild(navigation);
   }
 
+  setupMobileBottomNavigation();
+
   function bindThemeToggle(themeToggle) {
     if (!themeToggle || themeToggle.dataset.themeToggleBound === 'true') return;
     themeToggle.dataset.themeToggleBound = 'true';
@@ -3259,6 +3261,8 @@
       initAdminWorkspace()
     ]).catch(function (error) {
       console.error('Could not initialize marketplace page:', error);
+    }).finally(function () {
+      window.dispatchEvent(new Event('marketplace:ready'));
     });
   });
 })();

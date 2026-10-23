@@ -35,7 +35,7 @@ npm start
 
 Open `http://localhost:3000`. The Express server serves the page routes and API from one origin. `npm run dev` uses Node's watch mode.
 
-The website remains available in browsers, and the planned store app target is Android through Google Play only. The site includes an installable Progressive Web App (PWA) foundation with an offline shell; product, account, cart, and order data still requires an internet connection. The PWA foundation is not itself a Google Play release. A Play Store package and signed Android release build still need to be prepared against the final public HTTPS website address.
+The website remains available in browsers, and the planned store app target is Android through Google Play only. The site includes an installable Progressive Web App (PWA) foundation with an offline shell; product, account, cart, and order data still requires an internet connection. On mobile standalone launches, the marketplace displays a compact startup screen with a progress indicator while its initial data loads. The PWA foundation is not itself a Google Play release. A Play Store package and signed Android release build still need to be prepared against the final public HTTPS website address.
 
 ## Production deployment preparation
 

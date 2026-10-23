@@ -7,6 +7,9 @@ const PRECACHE_URLS = [
   '/site.webmanifest',
   '/css/styles.css',
   '/css/market-theme.css',
+  '/css/home.css',
+  '/js/app-launch.js',
+  '/js/marketplace.js',
   '/assets/kedolaka-market-icon.svg',
   '/assets/kedolaka-market-compact.svg'
 ];

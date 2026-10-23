@@ -12,6 +12,51 @@
       }
 
       * { box-sizing: border-box; }
+      .app-launch-screen[hidden] { display: none; }
+      .app-launch-screen {
+        position: fixed;
+        z-index: 2000;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: #fbf8f0;
+        opacity: 1;
+        transition: opacity 180ms ease;
+      }
+      .app-launch-screen.is-leaving { opacity: 0; }
+      .app-launch-content {
+        display: grid;
+        justify-items: center;
+        gap: 14px;
+        width: min(100% - 40px, 260px);
+        color: #123f35;
+        text-align: center;
+      }
+      .app-launch-content img {
+        width: 64px;
+        height: 64px;
+      }
+      .app-launch-content p {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+      }
+      .app-launch-progress {
+        width: 156px;
+        height: 4px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #e4e9e1;
+      }
+      .app-launch-progress span {
+        display: block;
+        width: var(--launch-progress, 6%);
+        height: 100%;
+        border-radius: inherit;
+        background: #f56600;
+        transition: width 100ms linear;
+      }
+
       html, body {
         margin: 0;
         background: var(--surface);
