@@ -832,6 +832,8 @@ button:disabled {
   *::before,
   *::after {
     scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
@@ -1867,7 +1869,6 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
     padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
   }
 
-  body > header .brand-logo-link,
   body > header .deliver-box,
   body > header .header-actions,
   body > header .main-nav,
@@ -1877,14 +1878,51 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
 
   body > header.topbar .topbar-inner {
     display: flex;
+    flex-direction: column;
     min-height: 0;
-    justify-content: center;
+    align-items: stretch;
+    gap: 6px;
     padding-block: 8px;
   }
 
+  body > header.topbar .brand-logo-link {
+    display: flex !important;
+    width: max-content;
+    min-height: 38px;
+    align-self: center;
+    justify-content: center;
+  }
+
+  body > header.topbar .brand-logo {
+    width: min(176px, 54vw);
+    height: 38px;
+  }
+
+  body > header.site-header .nav-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding-block: 8px;
+  }
+
+  body > header.site-header .brand-logo-link {
+    display: flex;
+    width: max-content;
+    min-height: 38px;
+    align-self: center;
+    justify-content: center;
+  }
+
+  body > header.site-header .brand-logo {
+    width: min(176px, 54vw);
+    height: 38px;
+  }
+
   body > header.topbar .search-shell,
-  body > header.topbar .global-market-search {
-    order: 0;
+  body > header.topbar .global-market-search,
+  body > header.site-header .global-market-search {
+    order: 1;
     flex: 1 1 auto;
     width: 100%;
     max-width: none;
@@ -1895,13 +1933,27 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
   body > header.topbar:not(:has(.topbar-inner)) {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 0;
+    gap: 6px;
     padding: 8px 12px;
+  }
+
+  body > header.topbar:not(:has(.topbar-inner)) > .brand-logo-link {
+    display: flex !important;
+    grid-column: 1;
+    grid-row: 1;
+    width: max-content;
+    min-height: 38px;
+    justify-self: center;
+  }
+
+  body > header.topbar:not(:has(.topbar-inner)) > .brand-logo-link .brand-logo {
+    width: min(176px, 54vw);
+    height: 38px;
   }
 
   body > header.topbar:not(:has(.topbar-inner)) > .global-market-search {
     grid-column: 1;
-    grid-row: 1;
+    grid-row: 2;
   }
 
   .mobile-bottom-navigation {
@@ -1919,6 +1971,7 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
   }
 
   .mobile-bottom-navigation-item {
+    position: relative;
     display: flex;
     min-width: 0;
     min-height: 48px;
@@ -1932,6 +1985,13 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
     line-height: 14px;
     text-align: center;
     white-space: nowrap;
+    border-radius: 10px;
+    transition: background-color 160ms ease;
+  }
+
+  .mobile-bottom-navigation-item:active,
+  .mobile-bottom-navigation-item.is-active {
+    background: #e8f2ff;
   }
 
   .mobile-bottom-navigation-item > svg,
@@ -1942,6 +2002,13 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
     flex: 0 0 32px;
     align-items: center;
     justify-content: center;
+  }
+
+  .mobile-bottom-home-icon {
+    width: 28px;
+    height: 28px;
+    flex-basis: 28px;
+    transition: transform 160ms ease;
   }
 
   .mobile-bottom-navigation-item > svg {
@@ -1965,8 +2032,8 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
   }
 
   .mobile-bottom-home-icon svg {
-    width: 19px;
-    height: 19px;
+    width: 16px;
+    height: 16px;
     fill: none;
     stroke: #fff;
     stroke-linecap: round;
@@ -1975,7 +2042,30 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
   }
 
   .mobile-bottom-navigation-item.is-active {
-    color: #f56600;
+    color: #2457a6;
+  }
+
+  .mobile-bottom-navigation-item.is-active::before {
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    width: 22px;
+    height: 3px;
+    border-radius: 999px;
+    background: #2457a6;
+    content: "";
+    transform: translateX(-50%);
+    transform-origin: center;
+    animation: mobile-nav-progress 220ms ease-out both;
+  }
+
+  .mobile-bottom-navigation-item.is-active .mobile-bottom-home-icon {
+    transform: scale(0.94);
+  }
+
+  @keyframes mobile-nav-progress {
+    from { transform: translateX(-50%) scaleX(0); }
+    to { transform: translateX(-50%) scaleX(1); }
   }
 
   body:has(#profileForm) .account-profile-menu {
