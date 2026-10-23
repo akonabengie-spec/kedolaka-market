@@ -1015,6 +1015,12 @@
 
         .home-store-header .header-actions {
           position: relative;
+          display: flex !important;
+          justify-content: flex-end;
+        }
+
+        .home-store-header .header-actions > :not(.mobile-settings-menu) {
+          display: none;
         }
 
         .mobile-settings-menu {
