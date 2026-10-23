@@ -1019,87 +1019,132 @@
           justify-content: flex-end;
         }
 
-        .home-store-header .header-actions > :not(.mobile-settings-menu) {
+        .home-store-header .header-actions > :not(.mobile-settings-button) {
           display: none;
         }
 
-        .mobile-settings-menu {
-          position: relative;
+        .mobile-settings-button {
+          display: inline-grid;
+          width: 44px;
+          height: 44px;
+          place-items: center;
           margin-left: auto;
-        }
-
-        .mobile-settings-menu > summary {
-          display: inline-flex;
-          min-height: 44px;
-          align-items: center;
-          justify-content: center;
-          padding: 8px 14px;
+          padding: 0;
           border: 1px solid #d5dfed;
           border-radius: 10px;
           background: #fff;
           color: #244a83;
           cursor: pointer;
-          font-weight: 700;
-          list-style: none;
         }
 
-        .mobile-settings-menu > summary::-webkit-details-marker {
-          display: none;
+        .mobile-settings-button svg {
+          width: 22px;
+          height: 22px;
+          fill: none;
+          stroke: currentColor;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          stroke-width: 1.7;
         }
 
-        .mobile-settings-menu > summary::after {
-          width: 0.45em;
-          height: 0.45em;
-          margin: -0.2em 0 0 8px;
-          border-right: 1.5px solid currentColor;
-          border-bottom: 1.5px solid currentColor;
-          content: "";
-          transform: rotate(45deg);
+        .mobile-settings-dialog {
+          width: 100%;
+          max-width: none;
+          height: 100%;
+          max-height: none;
+          margin: 0;
+          padding: 0;
+          border: 0;
+          background: #f5f7fa;
+          color: #26364f;
         }
 
-        .mobile-settings-menu[open] > summary::after {
-          margin-top: 0.2em;
-          transform: rotate(225deg);
+        .mobile-settings-dialog::backdrop {
+          background: rgba(19, 35, 58, 0.52);
         }
 
-        .mobile-settings-panel {
-          position: absolute;
-          z-index: 60;
-          top: calc(100% + 6px);
-          right: 0;
-          display: none;
-          width: min(260px, calc(100vw - 24px));
-          gap: 4px;
-          padding: 8px;
-          border: 1px solid #dce5f2;
-          border-radius: 10px;
-          background: #fff;
-          box-shadow: 0 8px 24px rgba(26, 46, 76, 0.16);
-        }
-
-        .mobile-settings-menu[open] .mobile-settings-panel {
+        .mobile-settings-content {
           display: grid;
+          align-content: start;
+          gap: 24px;
+          min-height: 100%;
+          padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
         }
 
-        .mobile-settings-panel > a,
-        .mobile-settings-panel > button {
+        .mobile-settings-heading {
           display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          padding: 12px 0 18px;
+          border-bottom: 1px solid #dce5f2;
+        }
+
+        .mobile-settings-eyebrow {
+          color: #63748c;
+          font-size: 0.7rem;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+        }
+
+        .mobile-settings-heading h2 {
+          margin: 4px 0 0;
+          color: #172b4d;
+          font-size: 1.6rem;
+        }
+
+        .mobile-settings-close {
+          display: grid;
+          width: 44px;
+          height: 44px;
+          place-items: center;
+          border: 1px solid #d5dfed;
+          border-radius: 50%;
+          background: #fff;
+          color: #244a83;
+          cursor: pointer;
+          font-size: 1.8rem;
+          line-height: 1;
+        }
+
+        .mobile-settings-section {
+          display: grid;
+          gap: 8px;
+        }
+
+        .mobile-settings-section h3 {
+          margin: 0 0 2px;
+          color: #63748c;
+          font-size: 0.82rem;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        .mobile-settings-section > a,
+        .mobile-settings-section > button {
+          display: flex;
+          width: 100%;
           min-height: 44px;
           align-items: center;
+          justify-content: space-between;
           padding: 9px 12px;
-          border: 0;
-          border-radius: 7px;
-          background: transparent;
+          border: 1px solid #dce5f2;
+          border-radius: 9px;
+          background: #fff;
           color: #2457a6;
           font-weight: 650;
           text-align: left;
           text-decoration: none;
         }
 
-        .mobile-settings-panel > a:hover,
-        .mobile-settings-panel > button:hover {
+        .mobile-settings-section > a:hover,
+        .mobile-settings-section > button:hover {
           background: #edf4fd;
           color: #173e7a;
+        }
+
+        .mobile-settings-section .theme-toggle {
+          justify-content: flex-start;
         }
 
         .home-store-page > nav.main-nav .settings-navigation,
@@ -1109,7 +1154,7 @@
       }
 
       @media (min-width: 769px) {
-        .mobile-settings-menu {
+        .mobile-settings-button {
           display: none;
         }
       }

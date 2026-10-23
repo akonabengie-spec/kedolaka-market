@@ -782,6 +782,17 @@
     addInstallButton(mainNavigation);
     bindThemeToggle(document.getElementById('profileThemeToggle'));
     bindThemeToggle(document.getElementById('mobileThemeToggle'));
+    const mobileSettingsButton = document.getElementById('mobileSettingsButton');
+    const mobileSettingsDialog = document.getElementById('mobileSettingsDialog');
+    const mobileSettingsClose = document.getElementById('mobileSettingsClose');
+    if (mobileSettingsButton && mobileSettingsDialog && mobileSettingsClose) {
+      mobileSettingsButton.addEventListener('click', function () {
+        mobileSettingsDialog.showModal();
+      });
+      mobileSettingsClose.addEventListener('click', function () {
+        mobileSettingsDialog.close();
+      });
+    }
 
     const header = document.querySelector('body > header');
     if (header && !header.querySelector('.search-shell, .global-market-search, #keywordSearch, form[role="search"]')) {
