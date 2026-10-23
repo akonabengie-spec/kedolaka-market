@@ -55,6 +55,8 @@ async function checkSchema() {
     vendor_payment_verifications: ['verification_id', 'order_id', 'vendor_id', 'verified_by', 'status', 'receipt_reference', 'created_at'],
     order_refunds: ['refund_id', 'order_id', 'payment_id', 'admin_user_id', 'amount_kina', 'refund_method', 'reference', 'reason', 'created_at'],
     admin_audit_logs: ['audit_log_id', 'admin_user_id', 'action', 'resource_type', 'resource_id', 'details', 'created_at'],
+    conversations: ['conversation_id', 'buyer_id', 'vendor_id', 'created_at', 'updated_at'],
+    conversation_messages: ['message_id', 'conversation_id', 'sender_user_id', 'message_body', 'created_at'],
     schema_migrations: ['version', 'applied_at']
   };
   requiredColumns.orders.push('idempotency_key', 'checkout_fingerprint', 'checkout_group_key', 'payment_instructions');
@@ -76,7 +78,10 @@ async function checkSchema() {
     'vendor_payment_verifications_verified_by_fkey', 'vendor_payment_verifications_status_check',
     'order_refunds_order_id_fkey', 'order_refunds_payment_id_fkey', 'order_refunds_admin_user_id_fkey',
     'order_refunds_amount_kina_check', 'order_refunds_refund_method_check',
-    'admin_audit_logs_admin_user_id_fkey'
+    'admin_audit_logs_admin_user_id_fkey', 'conversations_buyer_id_fkey',
+    'conversations_vendor_id_fkey', 'conversations_buyer_vendor_key',
+    'conversation_messages_conversation_id_fkey', 'conversation_messages_sender_user_id_fkey',
+    'conversation_messages_message_body_check'
   ];
   const requiredIndexes = [
     'idx_auth_sessions_user_expiry', 'idx_vendors_status', 'idx_products_listed_category',
@@ -84,7 +89,9 @@ async function checkSchema() {
     'idx_order_items_order', 'idx_order_items_vendor', 'idx_vendor_fulfillments_vendor',
     'idx_orders_buyer_idempotency', 'idx_admin_audit_logs_created', 'idx_admin_audit_logs_resource',
     'idx_payments_provider_reference', 'idx_payments_expiry', 'idx_inventory_reservations_active_product',
-    'idx_orders_buyer_checkout_group', 'idx_vendor_payment_verifications_order', 'idx_order_refunds_order_created'
+    'idx_orders_buyer_checkout_group', 'idx_vendor_payment_verifications_order', 'idx_order_refunds_order_created',
+    'idx_conversations_buyer_updated', 'idx_conversations_vendor_updated',
+    'idx_conversation_messages_conversation_created'
   ];
   try {
     const [columnsResult, constraintsResult, indexesResult] = await Promise.all([

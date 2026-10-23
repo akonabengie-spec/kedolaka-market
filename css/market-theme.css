@@ -1854,6 +1854,195 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
   cursor: not-allowed;
 }
 
+.mobile-bottom-navigation {
+  display: none;
+}
+
+.account-profile-menu {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body > header .brand-logo-link,
+  body > header .deliver-box,
+  body > header .header-actions,
+  body > header .main-nav,
+  body > nav.main-nav {
+    display: none !important;
+  }
+
+  body > header.topbar .topbar-inner {
+    display: flex;
+    min-height: 0;
+    justify-content: center;
+    padding-block: 8px;
+  }
+
+  body > header.topbar .search-shell,
+  body > header.topbar .global-market-search {
+    order: 0;
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+  }
+
+  body > header.topbar:not(:has(.topbar-inner)) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 8px 12px;
+  }
+
+  body > header.topbar:not(:has(.topbar-inner)) > .global-market-search {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .mobile-bottom-navigation {
+    position: fixed;
+    z-index: 1000;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid #e8e8e8;
+    background: #fff;
+    box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .mobile-bottom-navigation-item {
+    display: flex;
+    min-width: 0;
+    min-height: 48px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: #222;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 14px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .mobile-bottom-navigation-item > svg,
+  .mobile-bottom-home-icon {
+    display: flex;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-bottom-navigation-item > svg {
+    width: 23px;
+    height: 23px;
+    overflow: visible;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+  }
+
+  .mobile-bottom-navigation-item > svg rect {
+    fill: none;
+  }
+
+  .mobile-bottom-home-icon {
+    border-radius: 50%;
+    background: #f56600;
+  }
+
+  .mobile-bottom-home-icon svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: #fff;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+  }
+
+  .mobile-bottom-navigation-item.is-active {
+    color: #f56600;
+  }
+
+  body:has(#profileForm) .account-profile-menu {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 16px;
+    border: 1px solid var(--brand-line);
+    border-radius: 14px;
+    background: var(--brand-card);
+  }
+
+  .account-profile-menu h2 {
+    margin: 0;
+    color: var(--brand-forest-deep);
+    font-size: 1.1rem;
+  }
+
+  .account-profile-menu nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .account-profile-menu nav a,
+  .account-profile-actions button {
+    display: flex;
+    min-width: 0;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 10px;
+    border: 1px solid var(--brand-line);
+    border-radius: 9px;
+    background: var(--brand-card);
+    color: var(--brand-ink);
+    font-size: 0.9rem;
+    font-weight: 650;
+    text-align: center;
+  }
+
+  .account-profile-menu nav a[hidden] {
+    display: none;
+  }
+
+  .account-profile-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  body:has(#profileForm) main.container > nav[aria-label="Account sections"] {
+    display: none;
+  }
+}
+
+@media (max-width: 320px) {
+  .mobile-bottom-navigation {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .mobile-bottom-navigation-item {
+    font-size: 9px;
+  }
+}
+
 @media (max-width: 760px) {
   body > header .main-nav .nav-links,
   body > nav.main-nav .nav-links {

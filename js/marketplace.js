@@ -570,6 +570,95 @@
     });
   }
 
+  function setupMobileBottomNavigation() {
+    if (document.querySelector('.mobile-bottom-navigation')) return;
+
+    const pagePath = window.location.pathname;
+    const items = [
+      {
+        label: 'Home',
+        href: '/',
+        className: 'mobile-bottom-home',
+        active: pagePath === '/' || pagePath === '/index.html',
+        icon: '<path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2h-4v-6H9v6H5a2 2 0 0 1-2-2z"/>'
+      },
+      {
+        label: 'Categories',
+        href: '/categories',
+        active: ['/products', '/products.html', '/product-detail.html'].includes(pagePath),
+        icon: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>'
+      },
+      {
+        label: 'Messenger',
+        href: '/messenger.html',
+        active: pagePath === '/messenger.html',
+        icon: '<path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.5 8.5 0 0 1-3.5-.75L4 20l1.4-3.5A7.2 7.2 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7z"/><path d="M8 12h.01M12 12h.01M16 12h.01"/>'
+      },
+      {
+        label: 'Cart',
+        href: '/cart.html',
+        active: ['/cart.html', '/checkout.html'].includes(pagePath),
+        icon: '<path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 8H6"/><circle cx="10" cy="19" r="1"/><circle cx="18" cy="19" r="1"/>'
+      },
+      {
+        label: 'My Account',
+        href: '/account.html',
+        active: ['/account.html', '/login.html', '/register.html', '/forgot-password.html', '/reset-password.html', '/orders.html', '/order-detail.html', '/order-confirmation.html', '/payment-status.html'].includes(pagePath),
+        icon: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/>'
+      }
+    ];
+    const navigation = document.createElement('nav');
+    navigation.className = 'mobile-bottom-navigation';
+    navigation.setAttribute('aria-label', 'Mobile navigation');
+
+    items.forEach(function (item) {
+      const link = document.createElement('a');
+      link.className = 'mobile-bottom-navigation-item' + (item.className ? ' ' + item.className : '');
+      link.href = item.href;
+      if (item.active) {
+        link.classList.add('is-active');
+        link.setAttribute('aria-current', 'page');
+      }
+
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('viewBox', '0 0 24 24');
+      icon.setAttribute('aria-hidden', 'true');
+      icon.setAttribute('focusable', 'false');
+      icon.innerHTML = item.icon;
+
+      if (item.className === 'mobile-bottom-home') {
+        const homeIcon = document.createElement('span');
+        homeIcon.className = 'mobile-bottom-home-icon';
+        homeIcon.appendChild(icon);
+        link.append(homeIcon, document.createTextNode(item.label));
+      } else {
+        link.append(icon, document.createTextNode(item.label));
+      }
+      navigation.appendChild(link);
+    });
+
+    document.body.appendChild(navigation);
+  }
+
+  function bindThemeToggle(themeToggle) {
+    if (!themeToggle || themeToggle.dataset.themeToggleBound === 'true') return;
+    themeToggle.dataset.themeToggleBound = 'true';
+    themeToggle.textContent = currentColorTheme === 'dark' ? 'Light mode' : 'Dark mode';
+    themeToggle.setAttribute('aria-pressed', String(currentColorTheme === 'dark'));
+    themeToggle.addEventListener('click', function () {
+      currentColorTheme = currentColorTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = currentColorTheme;
+      if (browserThemeColor) browserThemeColor.content = currentColorTheme === 'dark' ? '#111827' : '#123f35';
+      themeToggle.textContent = currentColorTheme === 'dark' ? 'Light mode' : 'Dark mode';
+      themeToggle.setAttribute('aria-pressed', String(currentColorTheme === 'dark'));
+      try {
+        window.localStorage.setItem(colorThemeStorageKey, currentColorTheme);
+      } catch (error) {
+        console.error('Could not save the color theme preference:', error);
+      }
+    });
+  }
+
   function setupSharedNavigation() {
     const pageRole = document.body.dataset.requiresRole || '';
     const role = pageRole || (currentUser && currentUser.role) || '';
@@ -674,20 +763,7 @@
       const themeToggle = document.createElement('button');
       themeToggle.className = 'theme-toggle';
       themeToggle.type = 'button';
-      themeToggle.textContent = currentColorTheme === 'dark' ? 'Light mode' : 'Dark mode';
-      themeToggle.setAttribute('aria-pressed', String(currentColorTheme === 'dark'));
-      themeToggle.addEventListener('click', function () {
-        currentColorTheme = currentColorTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.dataset.theme = currentColorTheme;
-        if (browserThemeColor) browserThemeColor.content = currentColorTheme === 'dark' ? '#111827' : '#123f35';
-        themeToggle.textContent = currentColorTheme === 'dark' ? 'Light mode' : 'Dark mode';
-        themeToggle.setAttribute('aria-pressed', String(currentColorTheme === 'dark'));
-        try {
-          window.localStorage.setItem(colorThemeStorageKey, currentColorTheme);
-        } catch (error) {
-          console.error('Could not save the color theme preference:', error);
-        }
-      });
+      bindThemeToggle(themeToggle);
       links.appendChild(themeToggle);
       shell.appendChild(links);
     }
@@ -702,6 +778,7 @@
       updateAuthControl();
     }
     addInstallButton(mainNavigation);
+    bindThemeToggle(document.getElementById('profileThemeToggle'));
 
     const header = document.querySelector('body > header');
     if (header && !header.querySelector('.search-shell, .global-market-search, #keywordSearch, form[role="search"]')) {
@@ -789,6 +866,7 @@
       link.textContent = definition[0];
       footerLinks.appendChild(link);
     });
+    setupMobileBottomNavigation();
   }
 
   async function loadNavigationCategories(menu) {
@@ -1277,6 +1355,203 @@
     }
   }
 
+  async function initMessenger() {
+    const conversationList = document.getElementById('conversationList');
+    if (!conversationList) return;
+
+    const status = document.getElementById('messengerStatus');
+    const newConversationForm = document.getElementById('newConversationForm');
+    const vendorSelect = document.getElementById('messengerVendor');
+    const firstMessage = document.getElementById('firstMessage');
+    const threadHeading = document.getElementById('threadHeading');
+    const messageList = document.getElementById('messageList');
+    const replyForm = document.getElementById('replyForm');
+    const replyMessage = document.getElementById('replyMessage');
+    let conversations = [];
+    let selectedConversationId = null;
+
+    if (!currentUser) {
+      showMessage(status, 'Sign in to use Messenger.', 'error');
+      conversationList.replaceChildren();
+      return;
+    }
+
+    function showMessengerError(error) {
+      if (status) status.textContent = error.message;
+    }
+
+    async function loadMessages(conversationId) {
+      const result = await api('/api/messaging/conversations/' + encodeURIComponent(conversationId) + '/messages');
+      messageList.replaceChildren();
+      result.messages.forEach(function (message) {
+        const bubble = document.createElement('article');
+        bubble.className = 'message-bubble' +
+          (String(message.sender_user_id) === String(currentUser.id) ? ' is-own-message' : '');
+        const body = document.createElement('p');
+        body.textContent = message.message_body;
+        const time = document.createElement('time');
+        const createdAt = new Date(message.created_at);
+        time.dateTime = createdAt.toISOString();
+        time.textContent = message.sender_name + ' · ' +
+          new Intl.DateTimeFormat(undefined, { dateStyle: 'short', timeStyle: 'short' }).format(createdAt);
+        bubble.append(body, time);
+        messageList.appendChild(bubble);
+      });
+      if (!result.messages.length) {
+        const empty = document.createElement('p');
+        empty.className = 'thread-empty';
+        empty.textContent = 'No messages yet. Send a message to start the conversation.';
+        messageList.appendChild(empty);
+      }
+      messageList.scrollTop = messageList.scrollHeight;
+    }
+
+    async function refreshConversations() {
+      const result = await api('/api/messaging/conversations');
+      conversations = result.conversations;
+      conversationList.replaceChildren();
+      if (!conversations.length) {
+        const empty = document.createElement('p');
+        empty.className = 'thread-empty';
+        empty.textContent = currentUser.role === 'buyer'
+          ? 'No conversations yet. Choose a vendor above to start messaging.'
+          : 'No buyer conversations yet. They will appear here when a buyer messages your shop.';
+        conversationList.appendChild(empty);
+      }
+      conversations.forEach(function (conversation) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.setAttribute('aria-current', String(String(conversation.conversation_id) === String(selectedConversationId)));
+        const name = document.createElement('strong');
+        name.textContent = conversation.other_party_name;
+        const preview = document.createElement('span');
+        preview.textContent = conversation.last_message || 'No messages yet';
+        button.append(name, preview);
+        button.addEventListener('click', async function () {
+          selectedConversationId = conversation.conversation_id;
+          if (status) status.textContent = '';
+          threadHeading.replaceChildren();
+          const heading = document.createElement('h2');
+          heading.textContent = conversation.other_party_name;
+          const description = document.createElement('p');
+          description.textContent = currentUser.role === 'buyer'
+            ? 'Conversation with this vendor'
+            : 'Conversation with this buyer';
+          threadHeading.append(heading, description);
+          replyForm.hidden = false;
+          try {
+            await refreshConversations();
+            await loadMessages(selectedConversationId);
+          } catch (error) {
+            showMessengerError(error);
+          }
+        });
+        conversationList.appendChild(button);
+      });
+
+      if (selectedConversationId && !conversations.some(function (conversation) {
+        return String(conversation.conversation_id) === String(selectedConversationId);
+      })) {
+        selectedConversationId = null;
+      }
+      if (selectedConversationId) {
+        const active = Array.from(conversationList.querySelectorAll('button')).find(function (button, index) {
+          return String(conversations[index].conversation_id) === String(selectedConversationId);
+        });
+        if (active) active.setAttribute('aria-current', 'true');
+      }
+    }
+
+    if (currentUser.role === 'buyer') {
+      newConversationForm.hidden = false;
+      try {
+        const result = await api('/api/messaging/vendors');
+        result.vendors.forEach(function (vendor) {
+          const option = document.createElement('option');
+          option.value = vendor.vendor_id;
+          option.textContent = vendor.business_name + ' · ' + vendor.province;
+          vendorSelect.appendChild(option);
+        });
+        if (!result.vendors.length) {
+          const option = new Option('No active vendors available', '');
+          option.disabled = true;
+          vendorSelect.appendChild(option);
+        }
+      } catch (error) {
+        showMessengerError(error);
+      }
+      newConversationForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const submitButton = newConversationForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        try {
+          const result = await api('/api/messaging/conversations', {
+            method: 'POST',
+            body: JSON.stringify({ vendorId: vendorSelect.value, message: firstMessage.value })
+          });
+          selectedConversationId = result.conversationId;
+          firstMessage.value = '';
+          if (status) status.textContent = '';
+          await refreshConversations();
+          const conversation = conversations.find(function (item) {
+            return String(item.conversation_id) === String(selectedConversationId);
+          });
+          if (conversation) {
+            threadHeading.replaceChildren();
+            const heading = document.createElement('h2');
+            heading.textContent = conversation.other_party_name;
+            const description = document.createElement('p');
+            description.textContent = 'Conversation with this vendor';
+            threadHeading.append(heading, description);
+            replyForm.hidden = false;
+            await loadMessages(selectedConversationId);
+          }
+        } catch (error) {
+          showMessengerError(error);
+        } finally {
+          submitButton.disabled = false;
+        }
+      });
+    } else if (currentUser.role !== 'vendor') {
+      showMessengerError(new Error('Messenger is available to buyer and vendor accounts.'));
+      conversationList.replaceChildren();
+      return;
+    }
+
+    replyForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      if (!selectedConversationId) return;
+      const submitButton = replyForm.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      try {
+        await api('/api/messaging/conversations/' + encodeURIComponent(selectedConversationId) + '/messages', {
+          method: 'POST',
+          body: JSON.stringify({ message: replyMessage.value })
+        });
+        replyMessage.value = '';
+        if (status) status.textContent = '';
+        await Promise.all([loadMessages(selectedConversationId), refreshConversations()]);
+      } catch (error) {
+        showMessengerError(error);
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+
+    try {
+      await refreshConversations();
+    } catch (error) {
+      showMessengerError(error);
+      conversationList.textContent = 'Could not load conversations.';
+    }
+    window.setInterval(function () {
+      if (document.hidden) return;
+      refreshConversations().then(function () {
+        if (selectedConversationId) return loadMessages(selectedConversationId);
+      }).catch(showMessengerError);
+    }, 10000);
+  }
+
   async function initAccountProfile() {
     const form = document.getElementById('profileForm');
     if (!form) return;
@@ -1286,10 +1561,24 @@
     const email = document.getElementById('accountEmail');
     const role = document.getElementById('accountRole');
     const province = document.getElementById('profileProvince');
+    const roleLink = document.getElementById('accountRoleLink');
     if (name) name.textContent = text(currentUser.fullName || currentUser.full_name);
     if (email) email.textContent = text(currentUser.email);
     if (role) role.textContent = text(currentUser.role);
     if (province) province.value = currentUser.homeProvince || currentUser.home_province || 'NCD';
+    if (roleLink && currentUser.role === 'vendor') {
+      roleLink.href = '/vendor-dashboard.html';
+      roleLink.textContent = 'Vendor dashboard';
+      roleLink.hidden = false;
+    } else if (roleLink && currentUser.role === 'admin') {
+      roleLink.href = '/admin-dashboard.html';
+      roleLink.textContent = 'Admin dashboard';
+      roleLink.hidden = false;
+    } else if (roleLink) {
+      roleLink.href = '/vendor-application.html';
+      roleLink.textContent = 'Vendor application';
+      roleLink.hidden = false;
+    }
     form.addEventListener('submit', async function (event) {
       event.preventDefault();
       const button = form.querySelector('button[type="submit"]');
@@ -2964,6 +3253,7 @@
       loadProductDetail(),
       loadOrderDetail(),
       loadPaymentStatus(),
+      initMessenger(),
       initAccountProfile(),
       initVendorWorkspace(),
       initAdminWorkspace()

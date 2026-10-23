@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Messenger | KEDOLAKA MARKET</title>
+  <meta name="description" content="Message KEDOLAKA MARKET vendors and buyers about marketplace enquiries.">
+  <link rel="icon" type="image/svg+xml" href="/assets/kedolaka-market-icon.svg">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#123f35">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/market-theme.css">
+  <link rel="stylesheet" href="/css/pages/messenger.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand brand-logo-link" href="/" aria-label="KEDOLAKA MARKET home">
+      <img class="brand-logo" src="/assets/kedolaka-market-compact.svg" alt="KEDOLAKA MARKET">
+    </a>
+    <nav class="main-nav" aria-label="Main navigation"></nav>
+  </header>
+  <main class="container messenger-page">
+    <nav class="messenger-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / Messenger</nav>
+    <header class="messenger-heading">
+      <h1>Messenger</h1>
+      <p>Talk directly with buyers and vendors on KEDOLAKA MARKET.</p>
+    </header>
+    <p id="messengerStatus" class="messenger-status" aria-live="polite"></p>
+    <div class="messenger-layout">
+      <aside class="messenger-sidebar" aria-label="Conversations">
+        <form id="newConversationForm" class="new-conversation-form" hidden>
+          <label for="messengerVendor">Start a conversation</label>
+          <select id="messengerVendor" required>
+            <option value="">Choose a vendor</option>
+          </select>
+          <label class="visually-hidden" for="firstMessage">Your message</label>
+          <textarea id="firstMessage" rows="3" maxlength="2000" placeholder="Write your first message..." required></textarea>
+          <button type="submit">Message vendor</button>
+        </form>
+        <h2>Your conversations</h2>
+        <div id="conversationList" class="conversation-list" aria-live="polite">Loading conversations...</div>
+      </aside>
+      <section class="messenger-thread-panel" aria-label="Message thread">
+        <header id="threadHeading" class="thread-heading">
+          <h2>Select a conversation</h2>
+          <p>Your messages with the other person will appear here.</p>
+        </header>
+        <div id="messageList" class="message-list" aria-live="polite">
+          <p class="thread-empty">Choose a vendor to start a conversation, or select an existing conversation.</p>
+        </div>
+        <form id="replyForm" class="reply-form" hidden>
+          <label class="visually-hidden" for="replyMessage">Write a message</label>
+          <textarea id="replyMessage" rows="2" maxlength="2000" placeholder="Write a message..." required></textarea>
+          <button type="submit">Send</button>
+        </form>
+      </section>
+    </div>
+  </main>
+  <script src="/js/marketplace.js"></script>
+</body>
+</html>

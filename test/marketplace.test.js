@@ -84,6 +84,7 @@ test('database marketplace flow covers catalog, vendor approval, freight, checko
   let buyerId = null;
   let secondBuyerId = null;
   let vendorId = null;
+  let messagingConversationId = null;
   let freightRoute = null;
   let crossFreightDestination = null;
   const uploadedImagePaths = [];
@@ -408,9 +409,38 @@ test('database marketplace flow covers catalog, vendor approval, freight, checko
     assert.equal(buyerRegistration.status, 201);
     buyerId = (await buyerRegistration.json()).user.id;
     const buyerCookie = (buyerRegistration.headers.get('set-cookie') || '').split(';')[0];
-    for (const page of ['/cart.html', '/checkout.html', '/account.html', '/orders.html']) {
+    for (const page of ['/cart.html', '/checkout.html', '/account.html', '/orders.html', '/messenger.html']) {
       assert.equal((await request(page, { headers: { Cookie: buyerCookie } })).status, 200, page);
     }
+
+    const availableVendors = await request('/api/messaging/vendors', { headers: { Cookie: buyerCookie } });
+    assert.equal(availableVendors.status, 200);
+    assert.ok((await availableVendors.json()).vendors.some(function (vendor) {
+      return String(vendor.vendor_id) === String(vendorId);
+    }));
+    const startedConversation = await postJson('/api/messaging/conversations', {
+      vendorId: String(vendorId), message: 'Hello, is this item available?'
+    }, buyerCookie);
+    assert.equal(startedConversation.status, 201);
+    const startedConversationBody = await startedConversation.json();
+    messagingConversationId = startedConversationBody.conversationId;
+    assert.equal(startedConversationBody.message.message_body, 'Hello, is this item available?');
+    const vendorInbox = await request('/api/messaging/conversations', { headers: { Cookie: vendorCookie } });
+    assert.equal(vendorInbox.status, 200);
+    assert.equal((await vendorInbox.json()).conversations[0].other_party_name, 'Test Buyer');
+    const vendorReply = await postJson(
+      `/api/messaging/conversations/${messagingConversationId}/messages`,
+      { message: 'Yes, it is available.' }, vendorCookie
+    );
+    assert.equal(vendorReply.status, 201);
+    const conversationMessages = await request(
+      `/api/messaging/conversations/${messagingConversationId}/messages`,
+      { headers: { Cookie: buyerCookie } }
+    );
+    assert.equal(conversationMessages.status, 200);
+    assert.deepEqual((await conversationMessages.json()).messages.map(function (message) {
+      return message.message_body;
+    }), ['Hello, is this item available?', 'Yes, it is available.']);
 
     const deniedAdmin = await request('/api/admin/dashboard', { headers: { Cookie: buyerCookie } });
     assert.equal(deniedAdmin.status, 403);
@@ -807,6 +837,11 @@ test('database marketplace flow covers catalog, vendor approval, freight, checko
     assert.equal(secondBuyerRegistration.status, 201);
     secondBuyerId = (await secondBuyerRegistration.json()).user.id;
     const secondBuyerCookie = (secondBuyerRegistration.headers.get('set-cookie') || '').split(';')[0];
+    const privateConversation = await request(
+      `/api/messaging/conversations/${messagingConversationId}/messages`,
+      { headers: { Cookie: secondBuyerCookie } }
+    );
+    assert.equal(privateConversation.status, 404, 'Other buyers cannot read a vendor conversation.');
     const firstRaceCart = await request(`/api/cart/items/${product.product_id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Cookie: buyerCookie },
@@ -1182,7 +1217,7 @@ test('database marketplace flow covers catalog, vendor approval, freight, checko
     for (const imageUrl of uploadedImagePaths) {
       await fs.unlink(path.join(uploadsRoot, 'products', path.basename(imageUrl))).catch(function () {});
     }
-    await query('DELETE FROM users WHERE email = ANY($1::text[])', [[adminEmail, vendorEmail, secondVendorEmail, buyerEmail]]);
+    await query('DELETE FROM users WHERE email = ANY($1::text[])', [[adminEmail, vendorEmail, secondVendorEmail, buyerEmail, secondBuyerEmail]]);
     await new Promise(function (resolve, reject) {
       server.close(function (error) { if (error) reject(error); else resolve(); });
     });

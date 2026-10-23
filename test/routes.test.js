@@ -30,6 +30,7 @@ test('public page aliases, assets, and unauthenticated API guards are reachable'
     '/checkout.html': 'checkout.html',
     '/product-detail.html': 'product-detail.html',
     '/account.html': 'account.html',
+    '/messenger.html': 'messenger.html',
     '/orders.html': 'orders.html',
     '/my-orders.html': 'orders.html',
     '/payment-status.html': 'payment-status.html',
@@ -56,7 +57,7 @@ test('public page aliases, assets, and unauthenticated API guards are reachable'
     '/not-found.html': 'not-found.html'
   };
   const loginRequired = new Set([
-    '/cart.html', '/checkout.html', '/account.html', '/orders.html', '/my-orders.html',
+    '/cart.html', '/checkout.html', '/account.html', '/messenger.html', '/orders.html', '/my-orders.html',
     '/payment-status.html', '/order-detail.html', '/order-confirmation.html',
     '/vendor-application.html', '/vendor-dashboard.html', '/vendor-workspace.html',
     '/vendor-products.html', '/vendor-product-form.html', '/vendor-orders.html', '/admin-dashboard.html', '/admin.html',
@@ -169,6 +170,8 @@ test('public page aliases, assets, and unauthenticated API guards are reachable'
 
     const protectedPage = await fetch(baseUrl + '/api/auth/me');
     assert.equal(protectedPage.status, 401);
+    assert.equal((await fetch(baseUrl + '/api/messaging/vendors')).status, 401);
+    assert.equal((await fetch(baseUrl + '/api/messaging/conversations')).status, 401);
     const anonymousSession = await fetch(baseUrl + '/api/auth/session');
     assert.equal(anonymousSession.status, 200);
     assert.equal((await anonymousSession.json()).user, null);

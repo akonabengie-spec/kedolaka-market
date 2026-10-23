@@ -568,7 +568,8 @@ app.post('/api/auth/forgot-password', async function (req, res, next) {
         "INSERT INTO password_reset_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, NOW() + INTERVAL '30 minutes') RETURNING token_id",
         [found.rows[0].user_id, tokenHash]
       );
-      const baseUrl = process.env.APP_BASE_URL || `http://localhost:${PORT}`;
+      const baseUrl = process.env.APP_BASE_URL
+        || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${PORT}`);
       try {
         const delivery = await mailer.sendMail({
           from: process.env.MAIL_FROM,
@@ -712,6 +713,180 @@ app.get('/api/products/:productId', async function (req, res, next) {
     return res.status(200).json(successResponse(200, 'Product.', { product: result.rows[0] }));
   } catch (error) {
     return next(error);
+  }
+});
+
+app.get('/api/messaging/vendors', authenticateToken, requireRole('buyer'), async function (req, res, next) {
+  try {
+    const result = await query(
+      `SELECT vendor_id, COALESCE(NULLIF(business_name, ''), u.full_name) AS business_name, province
+         FROM vendors v JOIN users u ON u.user_id = v.user_id
+        WHERE v.status = 'active'
+        ORDER BY business_name, vendor_id`
+    );
+    return res.status(200).json(successResponse(200, 'Available vendors.', { vendors: result.rows }));
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.get('/api/messaging/conversations', authenticateToken, requireRole(['buyer', 'vendor']), async function (req, res, next) {
+  try {
+    const result = await query(
+      `SELECT c.conversation_id, c.updated_at,
+              CASE WHEN c.buyer_id = $1 THEN COALESCE(NULLIF(v.business_name, ''), vendor_user.full_name)
+                   ELSE buyer.full_name END AS other_party_name,
+              CASE WHEN c.buyer_id = $1 THEN v.vendor_id ELSE NULL END AS vendor_id,
+              latest.message_body AS last_message,
+              latest.created_at AS last_message_at
+         FROM conversations c
+         JOIN users buyer ON buyer.user_id = c.buyer_id
+         JOIN vendors v ON v.vendor_id = c.vendor_id
+         JOIN users vendor_user ON vendor_user.user_id = v.user_id
+         LEFT JOIN LATERAL (
+           SELECT message_body, created_at
+             FROM conversation_messages
+            WHERE conversation_id = c.conversation_id
+            ORDER BY created_at DESC, message_id DESC
+            LIMIT 1
+         ) latest ON TRUE
+        WHERE ($2 = 'buyer' AND c.buyer_id = $1)
+           OR ($2 = 'vendor' AND v.user_id = $1)
+        ORDER BY c.updated_at DESC, c.conversation_id DESC`,
+      [req.user.user_id, req.user.role]
+    );
+    if (req.user.role === 'vendor' && !result.rows.length) {
+      const vendor = await query('SELECT 1 FROM vendors WHERE user_id = $1', [req.user.user_id]);
+      if (!vendor.rows.length) {
+        return res.status(403).json(errorResponse(403, 'vendor_profile_required', 'A vendor profile is required to use Messenger.'));
+      }
+    }
+    return res.status(200).json(successResponse(200, 'Conversations.', { conversations: result.rows }));
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.post('/api/messaging/conversations', authenticateToken, requireRole('buyer'), async function (req, res, next) {
+  const vendorId = parsePositiveId(req.body && req.body.vendorId);
+  const messageBody = normalizeString(req.body && req.body.message);
+  if (!vendorId) return res.status(400).json(errorResponse(400, 'invalid_vendor', 'Choose a valid vendor.'));
+  if (!messageBody || messageBody.length > 2000) {
+    return res.status(400).json(errorResponse(400, 'invalid_message', 'Enter a message between 1 and 2000 characters.'));
+  }
+
+  let client;
+  try {
+    client = await pool.connect();
+    await client.query('BEGIN');
+    const vendor = await client.query(
+      `SELECT vendor_id FROM vendors
+        WHERE vendor_id = $1 AND status = 'active'`,
+      [vendorId]
+    );
+    if (!vendor.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(404).json(errorResponse(404, 'vendor_not_found', 'That active vendor could not be found.'));
+    }
+    const conversation = await client.query(
+      `INSERT INTO conversations (buyer_id, vendor_id)
+       VALUES ($1, $2)
+       ON CONFLICT ON CONSTRAINT conversations_buyer_vendor_key
+       DO UPDATE SET updated_at = conversations.updated_at
+       RETURNING conversation_id`,
+      [req.user.user_id, vendorId]
+    );
+    const createdMessage = await client.query(
+      `INSERT INTO conversation_messages (conversation_id, sender_user_id, message_body)
+       VALUES ($1, $2, $3)
+       RETURNING message_id, conversation_id, sender_user_id, message_body, created_at`,
+      [conversation.rows[0].conversation_id, req.user.user_id, messageBody]
+    );
+    await client.query(
+      'UPDATE conversations SET updated_at = NOW() WHERE conversation_id = $1',
+      [conversation.rows[0].conversation_id]
+    );
+    await client.query('COMMIT');
+    return res.status(201).json(successResponse(201, 'Conversation started.', {
+      conversationId: conversation.rows[0].conversation_id,
+      message: createdMessage.rows[0]
+    }));
+  } catch (error) {
+    if (client) await client.query('ROLLBACK');
+    return next(error);
+  } finally {
+    if (client) client.release();
+  }
+});
+
+app.get('/api/messaging/conversations/:conversationId/messages', authenticateToken, requireRole(['buyer', 'vendor']), async function (req, res, next) {
+  const conversationId = parsePositiveId(req.params.conversationId);
+  if (!conversationId) return res.status(400).json(errorResponse(400, 'invalid_conversation', 'Conversation ID is invalid.'));
+  try {
+    const result = await query(
+      `SELECT m.message_id, m.sender_user_id, sender.full_name AS sender_name,
+              m.message_body, m.created_at
+         FROM conversations c
+         JOIN vendors v ON v.vendor_id = c.vendor_id
+         JOIN conversation_messages m ON m.conversation_id = c.conversation_id
+         JOIN users sender ON sender.user_id = m.sender_user_id
+        WHERE c.conversation_id = $1
+          AND (c.buyer_id = $2 OR v.user_id = $2)
+        ORDER BY m.created_at DESC, m.message_id DESC
+        LIMIT 100`,
+      [conversationId, req.user.user_id]
+    );
+    const accessible = await query(
+      `SELECT 1
+         FROM conversations c JOIN vendors v ON v.vendor_id = c.vendor_id
+        WHERE c.conversation_id = $1 AND (c.buyer_id = $2 OR v.user_id = $2)`,
+      [conversationId, req.user.user_id]
+    );
+    if (!accessible.rows.length) {
+      return res.status(404).json(errorResponse(404, 'conversation_not_found', 'Conversation was not found.'));
+    }
+    return res.status(200).json(successResponse(200, 'Messages.', {
+      messages: result.rows.reverse()
+    }));
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.post('/api/messaging/conversations/:conversationId/messages', authenticateToken, requireRole(['buyer', 'vendor']), async function (req, res, next) {
+  const conversationId = parsePositiveId(req.params.conversationId);
+  const messageBody = normalizeString(req.body && req.body.message);
+  if (!conversationId) return res.status(400).json(errorResponse(400, 'invalid_conversation', 'Conversation ID is invalid.'));
+  if (!messageBody || messageBody.length > 2000) {
+    return res.status(400).json(errorResponse(400, 'invalid_message', 'Enter a message between 1 and 2000 characters.'));
+  }
+  let client;
+  try {
+    client = await pool.connect();
+    await client.query('BEGIN');
+    const result = await client.query(
+      `INSERT INTO conversation_messages (conversation_id, sender_user_id, message_body)
+       SELECT c.conversation_id, $2, $3
+         FROM conversations c JOIN vendors v ON v.vendor_id = c.vendor_id
+        WHERE c.conversation_id = $1 AND (c.buyer_id = $2 OR v.user_id = $2)
+       RETURNING message_id, conversation_id, sender_user_id, message_body, created_at`,
+      [conversationId, req.user.user_id, messageBody]
+    );
+    if (!result.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(404).json(errorResponse(404, 'conversation_not_found', 'Conversation was not found.'));
+    }
+    await client.query(
+      'UPDATE conversations SET updated_at = NOW() WHERE conversation_id = $1',
+      [conversationId]
+    );
+    await client.query('COMMIT');
+    return res.status(201).json(successResponse(201, 'Message sent.', { message: result.rows[0] }));
+  } catch (error) {
+    if (client) await client.query('ROLLBACK');
+    return next(error);
+  } finally {
+    if (client) client.release();
   }
 });
 
@@ -2624,6 +2799,7 @@ const publicPages = new Map([
   ['checkout.html', 'checkout.html'],
   ['product-detail.html', 'product-detail.html'],
   ['account.html', 'account.html'],
+  ['messenger.html', 'messenger.html'],
   ['orders.html', 'orders.html'],
   ['my-orders.html', 'orders.html'],
   ['order-confirmation.html', 'order-confirmation.html'],
@@ -2650,7 +2826,7 @@ const publicPages = new Map([
   ['not-found.html', 'not-found.html']
 ]);
 const authenticatedPages = new Set([
-  'cart.html', 'checkout.html', 'account.html', 'orders.html', 'my-orders.html',
+  'cart.html', 'checkout.html', 'account.html', 'messenger.html', 'orders.html', 'my-orders.html',
   'order-detail.html', 'order-confirmation.html', 'payment-status.html',
   'vendor-application.html', 'vendor-dashboard.html', 'vendor-workspace.html',
   'vendor-products.html', 'vendor-product-form.html', 'vendor-orders.html',
@@ -2701,6 +2877,9 @@ app.get('/:page', function (req, res, next) {
       return res.redirect(302, '/login.html?returnTo=' + encodeURIComponent(req.originalUrl));
     }
     if (vendorPages.has(pageName) && req.user.role !== 'vendor') {
+      return res.status(403).sendFile(path.join(root, '403.html'));
+    }
+    if (pageName === 'messenger.html' && !['buyer', 'vendor'].includes(req.user.role)) {
       return res.status(403).sendFile(path.join(root, '403.html'));
     }
     if (adminPages.has(pageName) && req.user.role !== 'admin') {

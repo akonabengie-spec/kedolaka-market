@@ -907,3 +907,38 @@
           padding: 10px;
         }
       }
+
+      @media (max-width: 768px) {
+        .home-store-header .topbar-inner {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          min-height: 0;
+          padding-block: 8px;
+        }
+
+        .home-search {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          order: 0;
+          width: 100%;
+          min-width: 0;
+        }
+
+        .home-search #categoryFilter,
+        .home-search #provinceFilter,
+        .home-search #sortFilter,
+        .home-search #minimumPriceFilter,
+        .home-search #maximumPriceFilter {
+          display: none;
+        }
+
+        .home-search input:first-child {
+          grid-column: 1;
+          grid-row: 1;
+        }
+
+        .home-search-submit {
+          grid-column: 2;
+          grid-row: 1;
+        }
+      }
