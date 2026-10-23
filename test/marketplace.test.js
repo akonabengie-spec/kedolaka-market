@@ -138,6 +138,7 @@ test('database marketplace flow covers catalog, vendor approval, freight, checko
     const adminCookie = await login(adminEmail);
     assert.equal((await request('/admin-dashboard.html', { headers: { Cookie: adminCookie } })).status, 200);
     assert.equal((await request('/admin-orders.html', { headers: { Cookie: adminCookie } })).status, 200);
+    assert.equal((await request('/messenger.html', { headers: { Cookie: adminCookie } })).status, 200);
     assert.equal((await request('/vendor-dashboard.html', { headers: { Cookie: adminCookie } })).status, 403);
 
     const missingVendorSetup = await postJson('/api/auth/register', {
@@ -441,6 +442,39 @@ test('database marketplace flow covers catalog, vendor approval, freight, checko
     assert.deepEqual((await conversationMessages.json()).messages.map(function (message) {
       return message.message_body;
     }), ['Hello, is this item available?', 'Yes, it is available.']);
+
+    const adminVendors = await request('/api/messaging/vendors', { headers: { Cookie: adminCookie } });
+    assert.equal(adminVendors.status, 200);
+    assert.ok((await adminVendors.json()).vendors.some(function (vendor) {
+      return String(vendor.vendor_id) === String(vendorId);
+    }));
+    const adminConversation = await postJson('/api/messaging/conversations', {
+      vendorId: String(vendorId), message: 'I have a question about your shop.'
+    }, adminCookie);
+    assert.equal(adminConversation.status, 201);
+    const adminConversationId = (await adminConversation.json()).conversationId;
+    const adminInbox = await request('/api/messaging/conversations', { headers: { Cookie: adminCookie } });
+    assert.equal(adminInbox.status, 200);
+    const adminConversations = (await adminInbox.json()).conversations;
+    assert.equal(adminConversations.length, 1);
+    assert.match(adminConversations[0].other_party_name, /^Test Shop /);
+    assert.equal(adminConversations[0].is_vendor_conversation, false);
+    const vendorAdminInbox = await request('/api/messaging/conversations', { headers: { Cookie: vendorCookie } });
+    assert.equal(vendorAdminInbox.status, 200);
+    assert.ok((await vendorAdminInbox.json()).conversations.some(function (conversation) {
+      return conversation.other_party_name === 'Test Administrator' && conversation.is_vendor_conversation;
+    }));
+    const vendorAdminReply = await postJson(
+      `/api/messaging/conversations/${adminConversationId}/messages`,
+      { message: 'How can I help?' }, vendorCookie
+    );
+    assert.equal(vendorAdminReply.status, 201);
+    const adminMessages = await request(
+      `/api/messaging/conversations/${adminConversationId}/messages`,
+      { headers: { Cookie: adminCookie } }
+    );
+    assert.equal(adminMessages.status, 200);
+    assert.equal((await adminMessages.json()).messages[1].message_body, 'How can I help?');
 
     const deniedAdmin = await request('/api/admin/dashboard', { headers: { Cookie: buyerCookie } });
     assert.equal(deniedAdmin.status, 403);

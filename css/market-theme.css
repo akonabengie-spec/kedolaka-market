@@ -1869,6 +1869,11 @@ body > nav.main-nav .settings-navigation-panel > a[aria-current="page"] {
     padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
   }
 
+  body:not(.home-store-page) > header .global-market-search,
+  body:not(.home-store-page) > header .search-shell {
+    display: none !important;
+  }
+
   body > header .deliver-box,
   body > header .header-actions,
   body > header .main-nav,

@@ -716,13 +716,14 @@ app.get('/api/products/:productId', async function (req, res, next) {
   }
 });
 
-app.get('/api/messaging/vendors', authenticateToken, requireRole('buyer'), async function (req, res, next) {
+app.get('/api/messaging/vendors', authenticateToken, async function (req, res, next) {
   try {
     const result = await query(
       `SELECT vendor_id, COALESCE(NULLIF(business_name, ''), u.full_name) AS business_name, province
          FROM vendors v JOIN users u ON u.user_id = v.user_id
-        WHERE v.status = 'active'
-        ORDER BY business_name, vendor_id`
+        WHERE v.status = 'active' AND v.user_id <> $1
+         ORDER BY business_name, vendor_id`,
+      [req.user.user_id]
     );
     return res.status(200).json(successResponse(200, 'Available vendors.', { vendors: result.rows }));
   } catch (error) {
@@ -730,13 +731,14 @@ app.get('/api/messaging/vendors', authenticateToken, requireRole('buyer'), async
   }
 });
 
-app.get('/api/messaging/conversations', authenticateToken, requireRole(['buyer', 'vendor']), async function (req, res, next) {
+app.get('/api/messaging/conversations', authenticateToken, async function (req, res, next) {
   try {
     const result = await query(
       `SELECT c.conversation_id, c.updated_at,
               CASE WHEN c.buyer_id = $1 THEN COALESCE(NULLIF(v.business_name, ''), vendor_user.full_name)
                    ELSE buyer.full_name END AS other_party_name,
               CASE WHEN c.buyer_id = $1 THEN v.vendor_id ELSE NULL END AS vendor_id,
+              CASE WHEN c.buyer_id = $1 THEN FALSE ELSE TRUE END AS is_vendor_conversation,
               latest.message_body AS last_message,
               latest.created_at AS last_message_at
          FROM conversations c
@@ -750,24 +752,17 @@ app.get('/api/messaging/conversations', authenticateToken, requireRole(['buyer',
             ORDER BY created_at DESC, message_id DESC
             LIMIT 1
          ) latest ON TRUE
-        WHERE ($2 = 'buyer' AND c.buyer_id = $1)
-           OR ($2 = 'vendor' AND v.user_id = $1)
+        WHERE c.buyer_id = $1 OR v.user_id = $1
         ORDER BY c.updated_at DESC, c.conversation_id DESC`,
-      [req.user.user_id, req.user.role]
+      [req.user.user_id]
     );
-    if (req.user.role === 'vendor' && !result.rows.length) {
-      const vendor = await query('SELECT 1 FROM vendors WHERE user_id = $1', [req.user.user_id]);
-      if (!vendor.rows.length) {
-        return res.status(403).json(errorResponse(403, 'vendor_profile_required', 'A vendor profile is required to use Messenger.'));
-      }
-    }
     return res.status(200).json(successResponse(200, 'Conversations.', { conversations: result.rows }));
   } catch (error) {
     return next(error);
   }
 });
 
-app.post('/api/messaging/conversations', authenticateToken, requireRole('buyer'), async function (req, res, next) {
+app.post('/api/messaging/conversations', authenticateToken, async function (req, res, next) {
   const vendorId = parsePositiveId(req.body && req.body.vendorId);
   const messageBody = normalizeString(req.body && req.body.message);
   if (!vendorId) return res.status(400).json(errorResponse(400, 'invalid_vendor', 'Choose a valid vendor.'));
@@ -819,7 +814,7 @@ app.post('/api/messaging/conversations', authenticateToken, requireRole('buyer')
   }
 });
 
-app.get('/api/messaging/conversations/:conversationId/messages', authenticateToken, requireRole(['buyer', 'vendor']), async function (req, res, next) {
+app.get('/api/messaging/conversations/:conversationId/messages', authenticateToken, async function (req, res, next) {
   const conversationId = parsePositiveId(req.params.conversationId);
   if (!conversationId) return res.status(400).json(errorResponse(400, 'invalid_conversation', 'Conversation ID is invalid.'));
   try {
@@ -853,7 +848,7 @@ app.get('/api/messaging/conversations/:conversationId/messages', authenticateTok
   }
 });
 
-app.post('/api/messaging/conversations/:conversationId/messages', authenticateToken, requireRole(['buyer', 'vendor']), async function (req, res, next) {
+app.post('/api/messaging/conversations/:conversationId/messages', authenticateToken, async function (req, res, next) {
   const conversationId = parsePositiveId(req.params.conversationId);
   const messageBody = normalizeString(req.body && req.body.message);
   if (!conversationId) return res.status(400).json(errorResponse(400, 'invalid_conversation', 'Conversation ID is invalid.'));
@@ -2877,9 +2872,6 @@ app.get('/:page', function (req, res, next) {
       return res.redirect(302, '/login.html?returnTo=' + encodeURIComponent(req.originalUrl));
     }
     if (vendorPages.has(pageName) && req.user.role !== 'vendor') {
-      return res.status(403).sendFile(path.join(root, '403.html'));
-    }
-    if (pageName === 'messenger.html' && !['buyer', 'vendor'].includes(req.user.role)) {
       return res.status(403).sendFile(path.join(root, '403.html'));
     }
     if (adminPages.has(pageName) && req.user.role !== 'admin') {

@@ -2,6 +2,9 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+for (const key of ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASSWORD', 'MAIL_FROM']) {
+  process.env[key] = '';
+}
 const { app, normalizeCategoryFilter } = require('../server/api');
 const { pool } = require('../server/db');
 

@@ -1415,9 +1415,7 @@
       if (!conversations.length) {
         const empty = document.createElement('p');
         empty.className = 'thread-empty';
-        empty.textContent = currentUser.role === 'buyer'
-          ? 'No conversations yet. Choose a vendor above to start messaging.'
-          : 'No buyer conversations yet. They will appear here when a buyer messages your shop.';
+        empty.textContent = 'No conversations yet. Choose a vendor above to start messaging.';
         conversationList.appendChild(empty);
       }
       conversations.forEach(function (conversation) {
@@ -1436,9 +1434,9 @@
           const heading = document.createElement('h2');
           heading.textContent = conversation.other_party_name;
           const description = document.createElement('p');
-          description.textContent = currentUser.role === 'buyer'
-            ? 'Conversation with this vendor'
-            : 'Conversation with this buyer';
+          description.textContent = conversation.is_vendor_conversation
+            ? 'Conversation with this buyer'
+            : 'Conversation with this vendor';
           threadHeading.append(heading, description);
           replyForm.hidden = false;
           try {
@@ -1464,61 +1462,55 @@
       }
     }
 
-    if (currentUser.role === 'buyer') {
-      newConversationForm.hidden = false;
+    newConversationForm.hidden = false;
+    try {
+      const result = await api('/api/messaging/vendors');
+      result.vendors.forEach(function (vendor) {
+        const option = document.createElement('option');
+        option.value = vendor.vendor_id;
+        option.textContent = vendor.business_name + ' · ' + vendor.province;
+        vendorSelect.appendChild(option);
+      });
+      if (!result.vendors.length) {
+        const option = new Option('No active vendors available', '');
+        option.disabled = true;
+        vendorSelect.appendChild(option);
+      }
+    } catch (error) {
+      showMessengerError(error);
+    }
+    newConversationForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const submitButton = newConversationForm.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
       try {
-        const result = await api('/api/messaging/vendors');
-        result.vendors.forEach(function (vendor) {
-          const option = document.createElement('option');
-          option.value = vendor.vendor_id;
-          option.textContent = vendor.business_name + ' · ' + vendor.province;
-          vendorSelect.appendChild(option);
+        const result = await api('/api/messaging/conversations', {
+          method: 'POST',
+          body: JSON.stringify({ vendorId: vendorSelect.value, message: firstMessage.value })
         });
-        if (!result.vendors.length) {
-          const option = new Option('No active vendors available', '');
-          option.disabled = true;
-          vendorSelect.appendChild(option);
+        selectedConversationId = result.conversationId;
+        firstMessage.value = '';
+        if (status) status.textContent = '';
+        await refreshConversations();
+        const conversation = conversations.find(function (item) {
+          return String(item.conversation_id) === String(selectedConversationId);
+        });
+        if (conversation) {
+          threadHeading.replaceChildren();
+          const heading = document.createElement('h2');
+          heading.textContent = conversation.other_party_name;
+          const description = document.createElement('p');
+          description.textContent = 'Conversation with this vendor';
+          threadHeading.append(heading, description);
+          replyForm.hidden = false;
+          await loadMessages(selectedConversationId);
         }
       } catch (error) {
         showMessengerError(error);
+      } finally {
+        submitButton.disabled = false;
       }
-      newConversationForm.addEventListener('submit', async function (event) {
-        event.preventDefault();
-        const submitButton = newConversationForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        try {
-          const result = await api('/api/messaging/conversations', {
-            method: 'POST',
-            body: JSON.stringify({ vendorId: vendorSelect.value, message: firstMessage.value })
-          });
-          selectedConversationId = result.conversationId;
-          firstMessage.value = '';
-          if (status) status.textContent = '';
-          await refreshConversations();
-          const conversation = conversations.find(function (item) {
-            return String(item.conversation_id) === String(selectedConversationId);
-          });
-          if (conversation) {
-            threadHeading.replaceChildren();
-            const heading = document.createElement('h2');
-            heading.textContent = conversation.other_party_name;
-            const description = document.createElement('p');
-            description.textContent = 'Conversation with this vendor';
-            threadHeading.append(heading, description);
-            replyForm.hidden = false;
-            await loadMessages(selectedConversationId);
-          }
-        } catch (error) {
-          showMessengerError(error);
-        } finally {
-          submitButton.disabled = false;
-        }
-      });
-    } else if (currentUser.role !== 'vendor') {
-      showMessengerError(new Error('Messenger is available to buyer and vendor accounts.'));
-      conversationList.replaceChildren();
-      return;
-    }
+    });
 
     replyForm.addEventListener('submit', async function (event) {
       event.preventDefault();

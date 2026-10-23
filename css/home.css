@@ -72,6 +72,7 @@
         color: #fff;
         border-bottom: 1px solid rgba(255,255,255,0.08);
       }
+      .mobile-search-welcome { display: none; }
       .topbar-inner {
         display: flex;
         align-items: center;
@@ -958,13 +959,38 @@
           display: grid;
           grid-template-columns: minmax(0, 1fr);
           min-height: 0;
+          gap: 7px;
           padding-block: 8px;
+        }
+
+        .mobile-search-welcome {
+          display: grid;
+          justify-items: center;
+          gap: 3px;
+          order: 1;
+          padding: 2px 8px 5px;
+          color: #fff;
+          text-align: center;
+        }
+
+        .mobile-search-welcome span {
+          color: #f6d797;
+          font-size: 0.62rem;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+        }
+
+        .mobile-search-welcome p {
+          margin: 0;
+          font-size: clamp(0.98rem, 4.5vw, 1.16rem);
+          font-weight: 700;
+          line-height: 1.25;
         }
 
         .home-search {
           display: grid;
           grid-template-columns: minmax(0, 1fr) auto;
-          order: 0;
+          order: 2;
           width: 100%;
           min-width: 0;
         }
