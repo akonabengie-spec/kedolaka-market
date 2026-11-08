@@ -54,6 +54,14 @@ test('registration and account retrieval use persistent revocable sessions', {
     assert.notEqual(savedUser.rows[0].password_hash, password);
     assert.equal(await require('bcryptjs').compare(password, savedUser.rows[0].password_hash), true);
 
+    const login = await request('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    assert.equal(login.status, 200);
+    cookie = (login.headers.get('set-cookie') || '').split(';')[0];
+
     const currentUser = await request('/api/auth/me', { headers: { Cookie: cookie } });
     assert.equal(currentUser.status, 200);
     assert.equal((await currentUser.json()).user.email, email);

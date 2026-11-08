@@ -602,37 +602,6 @@ app.get('/api/auth/confirm-email', async function (req, res, next) {
   }
 });
 
-app.post('/api/auth/resend-confirmation', async function (req, res, next) {
-  const email = normalizeString(req.body && req.body.email).toLowerCase();
-  try {
-    const result = await query('SELECT user_id, email_confirmed, google_subject FROM users WHERE email = $1', [email]);
-    const user = result.rows[0];
-    if (!user || user.email_confirmed || user.google_subject) {
-      return res.status(200).json(successResponse(200, 'If the account needs confirmation, a new email will be sent shortly.'));
-    }
-    if (!mailer) {
-      return res.status(503).json(errorResponse(503, 'confirmation_email_unavailable', 'Email delivery is not configured. Contact the site administrator.'));
-    }
-    await query('DELETE FROM email_confirmation_tokens WHERE user_id = $1', [user.user_id]);
-    const confirmationToken = crypto.randomBytes(32).toString('hex');
-    const confirmationHash = crypto.createHash('sha256').update(confirmationToken).digest('hex');
-    await query(
-      "INSERT INTO email_confirmation_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, NOW() + INTERVAL '24 hours')",
-      [user.user_id, confirmationHash]
-    );
-    try {
-      await sendConfirmationEmail(email, confirmationToken);
-    } catch (error) {
-      await query('DELETE FROM email_confirmation_tokens WHERE user_id = $1', [user.user_id]);
-      console.error('Confirmation email resend failed:', error.code || error.name || 'confirmation_error');
-      return res.status(502).json(errorResponse(502, 'confirmation_email_delivery_failed', 'The confirmation email could not be sent. Please try again later.'));
-    }
-    return res.status(200).json(successResponse(200, 'A new confirmation email has been sent.'));
-  } catch (error) {
-    return next(error);
-  }
-});
-
 app.get('/api/auth/google', function (req, res) {
   return res.status(404).json(errorResponse(404, 'account_creation_method_disabled', 'This account creation method is not available.'));
   const returnTo = normalizeString(req.query.returnTo);
