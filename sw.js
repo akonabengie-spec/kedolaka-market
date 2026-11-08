@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'kedolaka-market-v2';
+const CACHE_NAME = 'kedolaka-market-v3';
 const OFFLINE_PAGE = '/offline.html';
 const PRECACHE_URLS = [
   '/',

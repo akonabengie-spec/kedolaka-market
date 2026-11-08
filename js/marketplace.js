@@ -699,6 +699,12 @@
         href: '/account.html',
         active: ['/account.html', '/register.html', '/orders.html', '/order-detail.html', '/order-confirmation.html', '/payment-status.html'].includes(pagePath),
         icon: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/>'
+      },
+      {
+        label: 'Sign In',
+        href: '/login.html',
+        active: ['/login.html', '/auth-flow.html'].includes(pagePath),
+        icon: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/>'
       }
     ];
     const navigation = document.createElement('nav');
