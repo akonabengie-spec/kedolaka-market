@@ -24,6 +24,64 @@ body:has(#resetPasswordForm) main.container {
   width: 100%;
 }
 
+.auth-alternate-action {
+  margin: 18px 0 0;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: var(--brand-card-soft, #f4f7f5);
+  text-align: center;
+  font-weight: 700;
+}
+
+.auth-alternate-action a {
+  text-decoration: underline;
+}
+
+.oauth-actions,
+.auth-divider {
+  margin-bottom: 18px;
+}
+
+.resend-confirmation-button {
+  width: 100%;
+  margin-top: 12px;
+  background: transparent;
+}
+
+.oauth-actions .oauth-button {
+  width: 100%;
+  background: #fffefa;
+  color: var(--brand-forest-deep);
+}
+
+.oauth-button span {
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #4285f4;
+  color: #fff;
+  font-weight: 800;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--brand-muted);
+  font-size: 0.88rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--brand-line);
+}
+
 .password-field {
   display: flex;
   align-items: stretch;
