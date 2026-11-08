@@ -158,6 +158,7 @@ app.use(function (req, res, next) {
 });
 
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false });
+app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/signup', authLimiter);
 app.use('/api/auth/forgot-password', authLimiter);
@@ -497,6 +498,24 @@ app.post(['/api/auth/register', '/api/auth/signup'], async function (req, res, n
     return next(error);
   } finally {
     if (client) client.release();
+  }
+});
+
+app.post('/api/auth/login', async function (req, res, next) {
+  try {
+    const emailInput = normalizeString(req.body && (req.body.email || req.body.username));
+    const email = emailInput.toLowerCase();
+    const password = req.body && req.body.password;
+    if (!email || typeof password !== 'string') return res.status(400).json(errorResponse(400, 'missing_credentials', 'Email and password are required.'));
+    const result = await query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = result.rows[0];
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+      return res.status(401).json(errorResponse(401, 'invalid_credentials', 'Email or password is incorrect.'));
+    }
+    await issueSession(user, res);
+    return res.status(200).json(successResponse(200, 'Signed in.', { user: publicUser(user) }));
+  } catch (error) {
+    return next(error);
   }
 });
 

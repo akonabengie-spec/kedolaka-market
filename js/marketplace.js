@@ -1069,10 +1069,10 @@
       control.onclick = function () { window.alert(sessionError.message); };
       return;
     }
-    control.textContent = currentUser ? 'Sign Out' : 'Create account';
+    control.textContent = currentUser ? 'Sign Out' : 'Sign In';
     control.onclick = async function () {
       if (!currentUser) {
-        window.location.href = 'register.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = 'login.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
         return;
       }
       control.disabled = true;
@@ -1108,7 +1108,7 @@
     if ((requiresAuth && !currentUser) || (requiredRole && (!currentUser || currentUser.role !== requiredRole))) {
       if (!currentUser) {
         const destination = window.location.pathname + window.location.search;
-        window.location.replace('register.html?returnTo=' + encodeURIComponent(destination));
+        window.location.replace('login.html?returnTo=' + encodeURIComponent(destination));
         return;
       }
       const status = document.getElementById(requiredRole === 'admin' ? 'adminMessage' : 'vendorMessage');
@@ -1315,6 +1315,27 @@
         toggle.setAttribute('aria-pressed', String(revealed));
         toggle.classList.toggle('is-visible', revealed);
       });
+    });
+
+    const signIn = document.getElementById('signInForm');
+    if (signIn) signIn.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const button = signIn.querySelector('button[type="submit"]');
+      const status = document.getElementById('signInStatus');
+      button.disabled = true;
+      showMessage(status, 'Signing in...');
+      try {
+        const result = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({
+          email: document.getElementById('signInEmail').value,
+          password: document.getElementById('signInPassword').value
+        }) });
+        showMessage(status, 'Signed in. Redirecting...', 'success');
+        window.location.assign(safeReturnTo(result.user.role === 'vendor' ? 'vendor-application.html' : 'account.html'));
+      } catch (error) {
+        showMessage(status, error.message, 'error');
+      } finally {
+        button.disabled = false;
+      }
     });
 
     const register = document.getElementById('registerForm');
@@ -2114,7 +2135,7 @@
     button.addEventListener('click', async function () {
       const tracker = document.getElementById('orderTracker');
       if (!currentUser) {
-        window.location.href = 'register.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = 'login.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
         return;
       }
       const address = document.getElementById('deliveryAddress');
@@ -2275,7 +2296,7 @@
       if (add) add.disabled = Number(product.stock_quantity) < 1;
       if (add) add.addEventListener('click', async function () {
         if (!currentUser) {
-          window.location.href = 'register.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = 'login.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
           return;
         }
         try {
@@ -2302,7 +2323,7 @@
     const detail = document.getElementById('orderDetail');
     if (!detail) return;
     if (!currentUser) {
-      window.location.assign('register.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search));
+      window.location.assign('login.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search));
       return;
     }
     const params = new URLSearchParams(window.location.search);
@@ -2820,7 +2841,7 @@
     if (!workspace) return;
     const message = document.getElementById('vendorMessage');
     if (!currentUser) {
-      window.location.assign('register.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search));
+      window.location.assign('login.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search));
       return;
     }
     if (currentUser.role !== 'vendor') {
