@@ -158,7 +158,6 @@ app.use(function (req, res, next) {
 });
 
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false });
-app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/signup', authLimiter);
 app.use('/api/auth/forgot-password', authLimiter);
@@ -470,39 +469,34 @@ app.post(['/api/auth/register', '/api/auth/signup'], async function (req, res, n
         [user.user_id, vendorBusinessName || null, vendorProvince, JSON.stringify(vendorPaymentMethods)]
       );
     }
-    const sessionId = crypto.randomUUID();
-    await client.query(
-      "INSERT INTO auth_sessions (session_id, user_id, expires_at) VALUES ($1, $2, NOW() + INTERVAL '24 hours')",
-      [sessionId, user.user_id]
-    );
     await client.query('COMMIT');
-    ensureJwtSecret();
-    setSessionCookie(res, jwt.sign({ sub: String(user.user_id), jti: sessionId }, JWT_SECRET, { expiresIn: SESSION_SECONDS, algorithm: 'HS256' }));
-    return res.status(201).json(successResponse(201, 'Account created.', { user: publicUser(user) }));
+    let confirmationSent = false;
+    if (mailer) {
+      try {
+        const confirmationToken = crypto.randomBytes(32).toString('hex');
+        const confirmationHash = crypto.createHash('sha256').update(confirmationToken).digest('hex');
+        await query(
+          "INSERT INTO email_confirmation_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, NOW() + INTERVAL '24 hours')",
+          [user.user_id, confirmationHash]
+        );
+        const delivery = await sendConfirmationEmail(email, confirmationToken);
+        confirmationSent = Boolean(delivery.accepted && delivery.accepted.length && !(delivery.rejected && delivery.rejected.length));
+        if (!confirmationSent) await query('DELETE FROM email_confirmation_tokens WHERE user_id = $1', [user.user_id]);
+      } catch (error) {
+        await query('DELETE FROM email_confirmation_tokens WHERE user_id = $1', [user.user_id]);
+        console.error('Email confirmation delivery failed:', error.code || error.name || 'confirmation_error');
+      }
+    }
+    await issueSession(user, res);
+    return res.status(201).json(successResponse(201, confirmationSent
+      ? 'Account created. Check your email to confirm your address.'
+      : 'Account created, but the confirmation email could not be sent. Ask an administrator to enable email delivery.', { user: publicUser(user) }));
   } catch (error) {
     if (client) await client.query('ROLLBACK');
     if (error.code === '23505') return res.status(409).json(errorResponse(409, 'account_exists', 'An account with that email or phone number already exists.'));
     return next(error);
   } finally {
     if (client) client.release();
-  }
-});
-
-app.post('/api/auth/login', async function (req, res, next) {
-  try {
-    const emailInput = normalizeString(req.body && (req.body.email || req.body.username));
-    const email = emailInput.toLowerCase();
-    const password = req.body && req.body.password;
-    if (!email || typeof password !== 'string') return res.status(400).json(errorResponse(400, 'missing_credentials', 'Email and password are required.'));
-    const result = await query('SELECT * FROM users WHERE email = $1', [email]);
-    const user = result.rows[0];
-    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-      return res.status(401).json(errorResponse(401, 'invalid_credentials', 'Email or password is incorrect.'));
-    }
-    await issueSession(user, res);
-    return res.status(200).json(successResponse(200, 'Signed in.', { user: publicUser(user) }));
-  } catch (error) {
-    return next(error);
   }
 });
 
@@ -549,6 +543,161 @@ const mailer = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMT
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD }
   })
   : null;
+
+async function sendConfirmationEmail(email, confirmationToken) {
+  const delivery = await mailer.sendMail({
+    from: process.env.MAIL_FROM,
+    to: email,
+    subject: 'Confirm your KEDOLAKA MARKET account',
+    text: `Confirm your KEDOLAKA MARKET email within 24 hours:\n\n${configuredAppBaseUrl()}/api/auth/confirm-email?token=${encodeURIComponent(confirmationToken)}\n\nIf you did not create this account, ignore this email.`,
+    html: `<p>Confirm your KEDOLAKA MARKET email within 24 hours.</p><p><a href="${configuredAppBaseUrl()}/api/auth/confirm-email?token=${encodeURIComponent(confirmationToken)}">Confirm my email</a></p><p>If you did not create this account, ignore this email.</p>`
+  });
+  if (!delivery.accepted || !delivery.accepted.length || delivery.rejected && delivery.rejected.length) {
+    throw new Error('confirmation_email_rejected');
+  }
+  return delivery;
+}
+
+function configuredAppBaseUrl() {
+  return process.env.APP_BASE_URL
+  || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${PORT}`);
+}
+
+app.get('/api/auth/confirm-email', async function (req, res, next) {
+  const token = normalizeString(req.query.token).toLowerCase();
+  if (!/^[a-f0-9]{64}$/.test(token)) {
+  return res.redirect(302, '/register.html?confirmed=invalid');
+  }
+  try {
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  const result = await query(
+    'SELECT user_id FROM email_confirmation_tokens WHERE token_hash = $1 AND expires_at > NOW()',
+    [tokenHash]
+  );
+  if (!result.rows[0]) return res.redirect(302, '/register.html?confirmed=invalid');
+  await query('UPDATE users SET email_confirmed = TRUE, updated_at = NOW() WHERE user_id = $1', [result.rows[0].user_id]);
+  await query('DELETE FROM email_confirmation_tokens WHERE user_id = $1', [result.rows[0].user_id]);
+  return res.redirect(302, '/register.html?confirmed=true');
+  } catch (error) {
+  return next(error);
+  }
+});
+
+app.post('/api/auth/resend-confirmation', async function (req, res, next) {
+  const email = normalizeString(req.body && req.body.email).toLowerCase();
+  try {
+    const result = await query('SELECT user_id, email_confirmed, google_subject FROM users WHERE email = $1', [email]);
+    const user = result.rows[0];
+    if (!user || user.email_confirmed || user.google_subject) {
+      return res.status(200).json(successResponse(200, 'If the account needs confirmation, a new email will be sent shortly.'));
+    }
+    if (!mailer) {
+      return res.status(503).json(errorResponse(503, 'confirmation_email_unavailable', 'Email delivery is not configured. Contact the site administrator.'));
+    }
+    await query('DELETE FROM email_confirmation_tokens WHERE user_id = $1', [user.user_id]);
+    const confirmationToken = crypto.randomBytes(32).toString('hex');
+    const confirmationHash = crypto.createHash('sha256').update(confirmationToken).digest('hex');
+    await query(
+      "INSERT INTO email_confirmation_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, NOW() + INTERVAL '24 hours')",
+      [user.user_id, confirmationHash]
+    );
+    try {
+      await sendConfirmationEmail(email, confirmationToken);
+    } catch (error) {
+      await query('DELETE FROM email_confirmation_tokens WHERE user_id = $1', [user.user_id]);
+      console.error('Confirmation email resend failed:', error.code || error.name || 'confirmation_error');
+      return res.status(502).json(errorResponse(502, 'confirmation_email_delivery_failed', 'The confirmation email could not be sent. Please try again later.'));
+    }
+    return res.status(200).json(successResponse(200, 'A new confirmation email has been sent.'));
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.get('/api/auth/google', function (req, res) {
+  return res.status(404).json(errorResponse(404, 'account_creation_method_disabled', 'This account creation method is not available.'));
+  const returnTo = normalizeString(req.query.returnTo);
+  const state = crypto.randomBytes(24).toString('base64url') + '.' + encodeURIComponent(returnTo || '/account.html');
+  res.cookie('google_auth_state', state, {
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: process.env.NODE_ENV === 'production',
+  maxAge: 10 * 60 * 1000
+  });
+  const parameters = new URLSearchParams({
+  client_id: process.env.GOOGLE_CLIENT_ID,
+  redirect_uri: `${configuredAppBaseUrl()}/api/auth/google/callback`,
+  response_type: 'code',
+  scope: 'openid email profile',
+  state,
+  prompt: 'select_account'
+  });
+  return res.redirect(302, `https://accounts.google.com/o/oauth2/v2/auth?${parameters.toString()}`);
+});
+
+app.get('/api/auth/google/callback', async function (req, res, next) {
+  return res.status(404).json(errorResponse(404, 'account_creation_method_disabled', 'This account creation method is not available.'));
+  try {
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    return res.status(503).json(errorResponse(503, 'google_signin_unavailable', 'Google sign-in is not configured.'));
+  }
+  if (!req.query.code || req.query.state !== req.cookies.google_auth_state) {
+    return res.redirect(302, '/register.html?account_creation=cancelled');
+  }
+  const redirectUri = `${configuredAppBaseUrl()}/api/auth/google/callback`;
+  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code: String(req.query.code),
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: redirectUri,
+      grant_type: 'authorization_code'
+    })
+  });
+  const tokenPayload = await tokenResponse.json();
+  if (!tokenResponse.ok || !tokenPayload.id_token) throw new Error('google_token_exchange_failed');
+  const identityResponse = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(tokenPayload.id_token)}`);
+  const identity = await identityResponse.json();
+  if (!identityResponse.ok || identity.aud !== process.env.GOOGLE_CLIENT_ID ||
+      identity.email_verified !== true && identity.email_verified !== 'true' || !identity.email) {
+    throw new Error('google_identity_invalid');
+  }
+  const email = String(identity.email).trim().toLowerCase();
+  let userResult = await query('SELECT * FROM users WHERE google_subject = $1 OR email = $2 ORDER BY (google_subject = $1) DESC LIMIT 1', [identity.sub, email]);
+  let user = userResult.rows[0];
+  if (!user) {
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const phone = '+6757' + String(crypto.randomInt(1000000, 9999999)).padStart(7, '0');
+      try {
+        const passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12);
+        userResult = await query(
+          `INSERT INTO users (full_name, email, phone_number, home_province, role, password_hash, email_confirmed, google_subject)
+           VALUES ($1, $2, $3, 'NCD', 'buyer', $4, TRUE, $5)
+           RETURNING *`,
+          [normalizeString(identity.name) || 'Google customer', email, phone, passwordHash, identity.sub]
+        );
+        user = userResult.rows[0];
+        break;
+      } catch (error) {
+        if (error.code !== '23505') throw error;
+      }
+    }
+    if (!user) throw new Error('google_user_creation_failed');
+  } else {
+    await query('UPDATE users SET google_subject = $1, email_confirmed = TRUE, updated_at = NOW() WHERE user_id = $2', [identity.sub, user.user_id]);
+  }
+  await issueSession(user, res);
+  res.clearCookie('google_auth_state');
+  const encodedState = String(req.query.state || '');
+  const returnTo = encodedState.includes('.') ? decodeURIComponent(encodedState.split('.').slice(1).join('.')) : '/account.html';
+  return res.redirect(302, safeRedirectPath(returnTo));
+  } catch (error) {
+  console.error('Google sign-in failed:', error.message || error.name || 'google_signin_error');
+  return res.redirect(302, '/register.html?account_creation=failed');
+  }
+});
 
 app.post('/api/auth/forgot-password', async function (req, res, next) {
   const message = 'If the account exists and recovery email is configured, instructions will be sent.';
@@ -617,7 +766,7 @@ app.post('/api/auth/reset-password', async function (req, res, next) {
     await client.query('UPDATE auth_sessions SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL', [userId]);
     await client.query('COMMIT');
     clearSessionCookie(res);
-    return res.status(200).json(successResponse(200, 'Password changed. Sign in with your new password.'));
+    return res.status(200).json(successResponse(200, 'Password changed. Account access is available from your current session.'));
   } catch (error) {
     if (client) await client.query('ROLLBACK');
     return next(error);
@@ -2869,7 +3018,7 @@ app.get('/:page', function (req, res, next) {
   return optionalAuthenticateToken(req, res, async function (error) {
     if (error) return next(error);
     if (!req.user) {
-      return res.redirect(302, '/login.html?returnTo=' + encodeURIComponent(req.originalUrl));
+      return res.redirect(302, '/register.html?returnTo=' + encodeURIComponent(req.originalUrl));
     }
     if (vendorPages.has(pageName) && req.user.role !== 'vendor') {
       return res.status(403).sendFile(path.join(root, '403.html'));

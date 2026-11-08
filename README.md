@@ -71,7 +71,7 @@ The Android Play Store package cannot be generated until the website has a stabl
 
 ## Pages and navigation
 
-The customer journey uses `/` (marketplace), `/products` (search, category, price, and sort filters), `/product-detail.html?id=...`, `/cart.html`, `/checkout.html`, `/order-confirmation.html?ids=...`, `/orders.html`, `/order-detail.html?id=...`, `/payment-status.html?id=...`, `/account.html`, and `/messenger.html`. Any signed-in account can start a conversation with an active vendor; buyers, vendors, and administrators can view and reply only to conversations they participate in. Sign-in and recovery use `/login.html`, `/register.html`, `/forgot-password.html`, and `/reset-password.html?reset=...`. Vendor operations use `/vendor-application.html`, `/vendor-dashboard.html`, `/vendor-products.html`, `/vendor-product-form.html` (add or edit using an optional product `id`), and `/vendor-orders.html`. Administration uses `/admin-dashboard.html`, `/admin-vendors.html`, `/admin-products.html`, `/admin-orders.html`, `/admin-freight.html`, `/admin-payments.html`, and `/admin-audit.html`. `/help.html` is the support destination; navigation and product search are shared across the marketplace.
+The customer journey uses `/` (marketplace), `/products` (search, category, price, and sort filters), `/product-detail.html?id=...`, `/cart.html`, `/checkout.html`, `/order-confirmation.html?ids=...`, `/orders.html`, `/order-detail.html?id=...`, `/payment-status.html?id=...`, `/account.html`, and `/messenger.html`. Any signed-in account can start a conversation with an active vendor; buyers, vendors, and administrators can view and reply only to conversations they participate in. Account creation uses `/register.html`. Vendor operations use `/vendor-application.html`, `/vendor-dashboard.html`, `/vendor-products.html`, `/vendor-product-form.html` (add or edit using an optional product `id`), and `/vendor-orders.html`. Administration uses `/admin-dashboard.html`, `/admin-vendors.html`, `/admin-products.html`, `/admin-orders.html`, `/admin-freight.html`, `/admin-payments.html`, and `/admin-audit.html`. `/help.html` is the support destination; navigation and product search are shared across the marketplace.
 
 On mobile, the Home page header places a friendly welcome above the product search; other pages keep their own search and filters without a duplicate header search. A fixed bottom bar provides Home, Categories, Messenger, Cart, and My Account. The profile page groups account shortcuts, support, dark mode, and sign-out; desktop navigation remains unchanged.
 
@@ -133,7 +133,7 @@ Back up PostgreSQL with `pg_dump -Fc -d kundu_market -f kundu_market.backup` bef
 
 ## API outline
 
-- `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`, `GET /api/auth/session`
+- `POST /api/auth/register`, `POST /api/auth/logout`, `GET /api/auth/me`, `GET /api/auth/session`
 - `POST /api/auth/forgot-password`, `POST /api/auth/reset-password`
 - `GET /api/products` (supports `q`, `category`, `province`, `minPrice`, `maxPrice`, `sort`, `limit`, and `offset`), `GET /api/products/categories`, `GET /api/products/:productId`
 - `GET /api/cart`, `PUT /api/cart/items/:productId`, `DELETE /api/cart/items/:productId`

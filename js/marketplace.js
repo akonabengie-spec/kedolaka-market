@@ -697,7 +697,7 @@
       {
         label: 'My Account',
         href: '/account.html',
-        active: ['/account.html', '/login.html', '/register.html', '/forgot-password.html', '/reset-password.html', '/orders.html', '/order-detail.html', '/order-confirmation.html', '/payment-status.html'].includes(pagePath),
+        active: ['/account.html', '/register.html', '/orders.html', '/order-detail.html', '/order-confirmation.html', '/payment-status.html'].includes(pagePath),
         icon: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/>'
       }
     ];
@@ -1069,10 +1069,10 @@
       control.onclick = function () { window.alert(sessionError.message); };
       return;
     }
-    control.textContent = currentUser ? 'Sign Out' : 'Sign In';
+    control.textContent = currentUser ? 'Sign Out' : 'Create account';
     control.onclick = async function () {
       if (!currentUser) {
-        window.location.href = 'login.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = 'register.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
         return;
       }
       control.disabled = true;
@@ -1108,7 +1108,7 @@
     if ((requiresAuth && !currentUser) || (requiredRole && (!currentUser || currentUser.role !== requiredRole))) {
       if (!currentUser) {
         const destination = window.location.pathname + window.location.search;
-        window.location.replace('login.html?returnTo=' + encodeURIComponent(destination));
+        window.location.replace('register.html?returnTo=' + encodeURIComponent(destination));
         return;
       }
       const status = document.getElementById(requiredRole === 'admin' ? 'adminMessage' : 'vendorMessage');
@@ -1317,25 +1317,6 @@
       });
     });
 
-    const signIn = document.getElementById('signInForm');
-    if (signIn) signIn.addEventListener('submit', async function (event) {
-      event.preventDefault();
-      const button = signIn.querySelector('button[type="submit"]');
-      const status = document.getElementById('signInStatus');
-      button.disabled = true;
-      showMessage(status, 'Signing in...');
-      try {
-        const result = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({
-          email: document.getElementById('signInEmail').value,
-          password: document.getElementById('signInPassword').value
-        }) });
-        showMessage(status, 'Signed in. Redirecting...', 'success');
-        window.location.assign(safeReturnTo(result.user.role === 'vendor' ? 'vendor-application.html' : 'account.html'));
-      } catch (error) {
-        showMessage(status, error.message, 'error');
-      } finally { button.disabled = false; }
-    });
-
     const register = document.getElementById('registerForm');
     if (register) {
       const roleSelect = document.getElementById('registerRole');
@@ -1479,7 +1460,7 @@
     let selectedConversationId = null;
 
     if (!currentUser) {
-      showMessage(status, 'Sign in to use Messenger.', 'error');
+      showMessage(status, 'Create an account to use Messenger.', 'error');
       conversationList.replaceChildren();
       return;
     }
@@ -1735,7 +1716,7 @@
     const list = document.getElementById('cartItems');
     if (!list) return;
     if (!currentUser) {
-      list.textContent = sessionError ? sessionError.message : 'Sign in to view your saved cart.';
+      list.textContent = sessionError ? sessionError.message : 'Create an account to view your saved cart.';
       updateCartBadge(sessionError ? '–' : 0);
       const checkoutButton = document.getElementById('placeOrderButton');
       if (checkoutButton) checkoutButton.disabled = true;
@@ -2133,7 +2114,7 @@
     button.addEventListener('click', async function () {
       const tracker = document.getElementById('orderTracker');
       if (!currentUser) {
-        window.location.href = 'login.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = 'register.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
         return;
       }
       const address = document.getElementById('deliveryAddress');
@@ -2294,7 +2275,7 @@
       if (add) add.disabled = Number(product.stock_quantity) < 1;
       if (add) add.addEventListener('click', async function () {
         if (!currentUser) {
-          window.location.href = 'login.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = 'register.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search);
           return;
         }
         try {
@@ -2321,7 +2302,7 @@
     const detail = document.getElementById('orderDetail');
     if (!detail) return;
     if (!currentUser) {
-      window.location.assign('login.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search));
+      window.location.assign('register.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search));
       return;
     }
     const params = new URLSearchParams(window.location.search);
@@ -2839,7 +2820,7 @@
     if (!workspace) return;
     const message = document.getElementById('vendorMessage');
     if (!currentUser) {
-      window.location.assign('login.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search));
+      window.location.assign('register.html?returnTo=' + encodeURIComponent(window.location.pathname + window.location.search));
       return;
     }
     if (currentUser.role !== 'vendor') {

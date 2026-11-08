@@ -4,7 +4,7 @@ const crypto = require('node:crypto');
 const { isConfiguredDatabaseUrl } = require('./db-config');
 require('dotenv').config();
 
-test('registration, login, account retrieval, and logout use persistent revocable sessions', {
+test('registration and account retrieval use persistent revocable sessions', {
   skip: !isConfiguredDatabaseUrl(process.env.TEST_DATABASE_URL) && 'Set TEST_DATABASE_URL to an initialized disposable PostgreSQL database.'
 }, async function () {
   process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
@@ -54,21 +54,6 @@ test('registration, login, account retrieval, and logout use persistent revocabl
     assert.notEqual(savedUser.rows[0].password_hash, password);
     assert.equal(await require('bcryptjs').compare(password, savedUser.rows[0].password_hash), true);
 
-    const login = await request('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.toUpperCase(), password })
-    });
-    assert.equal(login.status, 200);
-    cookie = (login.headers.get('set-cookie') || '').split(';')[0];
-
-    const invalidLogin = await request('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: 'IncorrectPassword-675!' })
-    });
-    assert.equal(invalidLogin.status, 401);
-
     const currentUser = await request('/api/auth/me', { headers: { Cookie: cookie } });
     assert.equal(currentUser.status, 200);
     assert.equal((await currentUser.json()).user.email, email);
@@ -81,13 +66,7 @@ test('registration, login, account retrieval, and logout use persistent revocabl
     const unauthorized = await request('/api/auth/me');
     assert.equal(unauthorized.status, 401);
 
-    const expiringLogin = await request('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    assert.equal(expiringLogin.status, 200);
-    const expiringCookie = (expiringLogin.headers.get('set-cookie') || '').split(';')[0];
+    const expiringCookie = cookie;
     const token = decodeURIComponent(expiringCookie.slice(expiringCookie.indexOf('=') + 1));
     const sessionId = require('jsonwebtoken').decode(token).jti;
     await query("UPDATE auth_sessions SET expires_at = NOW() - INTERVAL '1 minute' WHERE session_id = $1", [sessionId]);

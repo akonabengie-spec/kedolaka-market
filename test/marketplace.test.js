@@ -101,12 +101,6 @@ test('database marketplace flow covers catalog, vendor approval, freight, checko
     });
   }
 
-  async function login(email) {
-    const response = await postJson('/api/auth/login', { email, password });
-    assert.equal(response.status, 200);
-    return (response.headers.get('set-cookie') || '').split(';')[0];
-  }
-
   try {
     const routes = await query(
       `SELECT origins.origin AS origin, destinations.destination AS destination, providers.provider
@@ -128,14 +122,17 @@ test('database marketplace flow covers catalog, vendor approval, freight, checko
     );
     assert.ok(routes.rows[0], 'Test database needs one unused route for an isolated freight fixture.');
     freightRoute = routes.rows[0];
-    const passwordHash = await bcrypt.hash(password, 10);
+    const adminRegistration = await postJson('/api/auth/register', {
+      fullName: 'Test Administrator', email: adminEmail, phoneNumber: adminPhone,
+      password, role: 'buyer', homeProvince: 'NCD'
+    });
+    assert.equal(adminRegistration.status, 201);
     const createdAdmin = await query(
-      `INSERT INTO users (full_name, email, phone_number, home_province, role, password_hash)
-       VALUES ('Test Administrator', $1, $2, 'NCD', 'admin', $3) RETURNING user_id`,
-      [adminEmail, adminPhone, passwordHash]
+      "UPDATE users SET role = 'admin' WHERE email = $1 RETURNING user_id",
+      [adminEmail]
     );
     adminId = createdAdmin.rows[0].user_id;
-    const adminCookie = await login(adminEmail);
+    const adminCookie = (adminRegistration.headers.get('set-cookie') || '').split(';')[0];
     assert.equal((await request('/admin-dashboard.html', { headers: { Cookie: adminCookie } })).status, 200);
     assert.equal((await request('/admin-orders.html', { headers: { Cookie: adminCookie } })).status, 200);
     assert.equal((await request('/messenger.html', { headers: { Cookie: adminCookie } })).status, 200);
